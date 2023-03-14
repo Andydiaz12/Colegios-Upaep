@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Colegios productivo</string>
+
+    <!--Forgot password -->
+    <string name="forgot_password_title">Olvidé mi contraseña</string>
+    <string name="forgot_password_content">Tu correo electrónico y contraseña se utilizan para ingresar al portal y la app de padres de familia. Puedes cambiar tu contraseña por razones de seguridad o restablecerla si la olvidas</string>
+</resources>
