@@ -13,6 +13,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,17 +38,19 @@ fun LoginExtraScreen(
     toScreen: String
 ) {
     val blockedScreen: Boolean = LoginExtraViewModel.getScreen(toScreen)
+    val titleText: Int by LoginExtraViewModel.titleText.observeAsState(LoginExtraViewModel.getTitleText())
+    val contentText: Int by LoginExtraViewModel.contentText.observeAsState(LoginExtraViewModel.getContentText())
+    val mail: String by LoginExtraViewModel.email.observeAsState("")
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
             .padding(32.dp)
     ) {
         val (header, imageContainer, informationContainer, mailInput, footer) = createRefs()
-        val middleGuideLine = createGuidelineFromTop(0.75f) // 0.75 cuando hay img
+        val middleGuideLine = createGuidelineFromTop(if (blockedScreen) 0.75f else 0.5f)
         Header(modifier = Modifier.constrainAs(header) {
             top.linkTo(parent.top)
-            //}, visibleMenu = false, visibleImage = false, navigation = navigation)
-        }, visibleMenu = false, visibleImage = false)
+        }, visibleMenu = false, visibleImage = false, navigation = navigation)
         if (blockedScreen) {
             ImageContainer(modifier = Modifier.constrainAs(imageContainer) {
                 top.linkTo(header.bottom)
@@ -57,19 +60,17 @@ fun LoginExtraScreen(
             })
         }
         InformationContainer(modifier = Modifier.constrainAs(informationContainer) {
-            if(blockedScreen) {
+            if (blockedScreen) {
                 top.linkTo(imageContainer.bottom)
             }
             bottom.linkTo(mailInput.top)
-        })
-        if(!blockedScreen) {
+        }, titleText = titleText, contentText = contentText)
+        if (!blockedScreen) {
             MailInput(modifier = Modifier.constrainAs(mailInput) {
                 bottom.linkTo(middleGuideLine)
-                //}, theme = theme, onValueChange = {
-            }, theme = ThemeSchema.LIGHT, onValueChange = {
-                //LoginExtraViewModel.updateMail(it)
-                //}, mail = mail)
-            }, mail = "")
+            }, theme = theme, onValueChange = {
+                LoginExtraViewModel.updateMail(it)
+            }, mail = mail)
         }
         FooterContainer(modifier = Modifier.constrainAs(footer) {
             bottom.linkTo(parent.bottom)
@@ -134,10 +135,10 @@ fun FooterContainer(modifier: Modifier) {
 }
 
 @Composable
-fun InformationContainer(modifier: Modifier) {
+fun InformationContainer(modifier: Modifier, titleText: Int, contentText: Int) {
     Column(modifier = modifier) {
         TextContent(
-            "Olvidé mi contraseña",
+            stringResource(id = titleText),
             bold = true,
             textColor = Messages_red,
             fontFamily = firasans_bold,
@@ -145,7 +146,7 @@ fun InformationContainer(modifier: Modifier) {
         )
         Spacer(modifier = Modifier.size(12.dp))
         TextContent(
-            "Tu correo electrónico y contraseña se utilizan para ingresar al portal y la app de padres de familia. Puedes cambiar tu contraseña por razones de seguridad o restablecerla si la olvidas.",
+            stringResource(id = contentText),
             textColor = Color(0xFF707070),
             fontFamily = roboto_regular
         )

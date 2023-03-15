@@ -4,4 +4,6 @@
     <!--Forgot password -->
     <string name="forgot_password_title">Olvidé mi contraseña</string>
     <string name="forgot_password_content">Tu correo electrónico y contraseña se utilizan para ingresar al portal y la app de padres de familia. Puedes cambiar tu contraseña por razones de seguridad o restablecerla si la olvidas</string>
+    <string name="blocked_account_title">Cuenta bloqueada</string>
+    <string name="blocked_account_content">Tu cuenta ha sido bloqueada después de varios intentos fallidos. Vuelve a intentarlo en unas horas o asigna una nueva contraseña</string>
 </resources>
