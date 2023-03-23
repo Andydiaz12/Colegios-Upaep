@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
@@ -120,7 +122,7 @@ fun News(modifier: Modifier) {
     val pagerState = rememberPagerState()
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.size(30.dp))
-        Card(modifier = modifier) {
+        Card(modifier = modifier, shape = RoundedCornerShape(10.dp), elevation = 3.dp) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 HorizontalPager(
                     count = news.size,
@@ -176,7 +178,12 @@ fun NewsContent(title: String, content: String) {
     ) {
         Text(text = title, color = Messages_red, fontFamily = roboto_black)
         Spacer(modifier = Modifier.size(15.dp))
-        Text(text = content, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(
+            text = content,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.height(40.dp)
+        )
     }
 }
 
@@ -187,11 +194,11 @@ data class News(
 
 fun getNews(): List<News> {
     return listOf(
+        News(title = "Aviso 2", content = "Contenido 2"),
         News(
             title = "Avisos",
             content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
-        ),
-        News(title = "Aviso 2", content = "Contenido 2"),
+        )
     )
 }
 
