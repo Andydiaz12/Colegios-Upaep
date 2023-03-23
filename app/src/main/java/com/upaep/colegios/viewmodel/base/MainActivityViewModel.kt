@@ -13,5 +13,8 @@ class MainActivityViewModel @Inject constructor() : ViewModel() {
     private val _theme = MutableLiveData<ThemeSchema>(ThemeSchema.LIGHT)
     val theme: LiveData<ThemeSchema> = _theme
 
+    fun testing() {
+
+    }
     fun getTheme(): ThemeSchema = _theme.value!!
 }
