@@ -1,4 +1,4 @@
-package com.upaep.colegios.viewmodel.Base
+package com.upaep.colegios.viewmodel.base
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

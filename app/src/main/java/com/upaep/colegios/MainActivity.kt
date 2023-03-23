@@ -11,7 +11,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import com.upaep.colegios.view.base.navigation.AppNavigation
 import com.upaep.colegios.view.base.theme.ColegiosProductivoTheme
-import com.upaep.colegios.viewmodel.Base.MainActivityViewModel
+import com.upaep.colegios.viewmodel.base.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -10,3 +10,6 @@ val Upaep_red = Color(0xFFE10023)
 val Placeholders = Color(0xFFBFBFBF)
 val Messages_red = Color(0xFFE30921)
 val Input_border = Color(0xFFB5BABD)
+val OnBoard_footer = Color(0xFF909496)
+val Preschool_color
+val Primary_color

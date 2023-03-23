@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.upaep.colegios.view.base.theme.ThemeSchema
 import com.upaep.colegios.view.features.login.LoginExtraScreen
 import com.upaep.colegios.view.features.login.LoginScreen
+import com.upaep.colegios.view.features.onboard.OnBoardScreen
 
 @Composable
 fun AppNavigation(theme: ThemeSchema) {
@@ -26,7 +27,9 @@ fun AppNavigation(theme: ThemeSchema) {
                 navigation = navigationController,
                 toScreen = backStackEntry.arguments!!.getString("toScreen").toString()
             )
-            //LoginExtraScreen()
+        }
+        composable(Routes.OnBoardScreen.routes) {
+            OnBoardScreen()
         }
     }
 }

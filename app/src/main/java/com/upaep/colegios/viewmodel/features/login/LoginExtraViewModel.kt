@@ -1,6 +1,5 @@
-package com.upaep.colegios.viewmodel.Features.login
+package com.upaep.colegios.viewmodel.features.login
 
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

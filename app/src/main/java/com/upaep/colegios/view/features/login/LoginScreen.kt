@@ -6,14 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,8 +26,7 @@ import com.upaep.colegios.view.base.genericComponents.RedButton
 import com.upaep.colegios.view.base.genericComponents.ShowPasswordIcon
 import com.upaep.colegios.view.base.navigation.Routes
 import com.upaep.colegios.view.base.theme.*
-import com.upaep.colegios.viewmodel.Features.login.LoginViewModel
-import kotlin.math.log
+import com.upaep.colegios.viewmodel.features.login.LoginViewModel
 
 @Composable
 fun LoginScreen(
@@ -71,7 +65,11 @@ fun LoginScreen(
             )
             ForgotPassword(theme = theme, navigation = navigation)
         }
-        ButtonContainer(modifier = Modifier.align(Alignment.BottomCenter), loginViewModel = loginViewModel, navigation = navigation)
+        ButtonContainer(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            loginViewModel = loginViewModel,
+            navigation = navigation
+        )
     }
 }
 
@@ -88,13 +86,19 @@ fun ForgotPassword(theme: ThemeSchema, navigation: NavHostController) {
 }
 
 @Composable
-fun ButtonContainer(modifier: Modifier, loginViewModel: LoginViewModel, navigation: NavHostController) {
+fun ButtonContainer(
+    modifier: Modifier,
+    loginViewModel: LoginViewModel,
+    navigation: NavHostController
+) {
     Column(modifier = modifier) {
         RedButton("ENTRAR") {
-            navigation.navigate(Routes.LoginExtraScreen.createRoute("blockedAccount"))
+            navigation.navigate(Routes.OnBoardScreen.routes)
         }
         LoginButtonsSeparation()
-        GoogleButton()
+        GoogleButton(onButtonClicked = {
+            navigation.navigate(Routes.LoginExtraScreen.createRoute("blockedAccount"))
+        })
     }
 }
 
@@ -116,9 +120,9 @@ fun LoginButtonsSeparation() {
 }
 
 @Composable
-fun GoogleButton() {
+fun GoogleButton(onButtonClicked: () -> Unit) {
     Button(
-        onClick = { },
+        onClick = { onButtonClicked() },
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp),
