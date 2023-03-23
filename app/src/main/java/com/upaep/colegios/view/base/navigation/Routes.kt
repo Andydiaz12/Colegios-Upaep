@@ -6,4 +6,5 @@ sealed class Routes(val routes: String, val screenName: String = "") {
         fun createRoute(toScreen: String) = "LoginExtraScreen/$toScreen"
     }
     object OnBoardScreen: Routes("onBoardScreen")
+    object StudentSelectorScreen: Routes("studentSelectorScreen")
 }

@@ -2,6 +2,7 @@ package com.upaep.colegios.view.features.onboard
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -23,15 +24,19 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.upaep.colegios.data.entities.onboard.OnBoardInfo
-import com.upaep.colegios.view.base.theme.onBoard_footer
+import com.upaep.colegios.view.base.theme.OnBoard_footer
 import com.upaep.colegios.view.base.theme.roboto_black
 import com.upaep.colegios.view.base.theme.roboto_medium
 import com.upaep.colegios.view.base.theme.roboto_regular
 import com.upaep.colegios.viewmodel.features.onboard.OnBoardViewModel
 
 @Composable
-fun OnBoardScreen(onBoardViewModel: OnBoardViewModel = hiltViewModel()) {
+fun OnBoardScreen(
+    onBoardViewModel: OnBoardViewModel = hiltViewModel(),
+    navigation: NavHostController
+) {
     val actualScreen by onBoardViewModel.actualScreen.observeAsState(initial = 1)
     val screenContent = onBoardViewModel.screensContent
     ConstraintLayout() {
@@ -43,7 +48,8 @@ fun OnBoardScreen(onBoardViewModel: OnBoardViewModel = hiltViewModel()) {
         ScreenContent(
             onBoardViewModel = onBoardViewModel,
             actualScreen = actualScreen,
-            screenContent = screenContent
+            screenContent = screenContent,
+            navigation = navigation
         )
     }
 }
@@ -52,7 +58,8 @@ fun OnBoardScreen(onBoardViewModel: OnBoardViewModel = hiltViewModel()) {
 fun ScreenContent(
     onBoardViewModel: OnBoardViewModel,
     actualScreen: Int,
-    screenContent: List<OnBoardInfo>
+    screenContent: List<OnBoardInfo>,
+    navigation: NavHostController
 ) {
     ConstraintLayout(
         modifier = Modifier
@@ -76,7 +83,7 @@ fun ScreenContent(
                         }
                     },
                     onDragEnd = {
-                        onBoardViewModel.navigateOnBoard()
+                        onBoardViewModel.navigateOnBoard(navigation = navigation)
                     }
                 )
             }
@@ -84,7 +91,10 @@ fun ScreenContent(
                 detectTapGestures(
                     onPress = {},
                     onTap = { tapCoordenate ->
-                        onBoardViewModel.tappingEvent(tapCoordenate.x)
+                        onBoardViewModel.tappingEvent(
+                            tapOnX = tapCoordenate.x,
+                            navigation = navigation
+                        )
                     }
                 )
             }
@@ -103,7 +113,7 @@ fun ScreenContent(
             bottom.linkTo(parent.bottom)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        })
+        }, navigation = navigation, onBoardViewModel = onBoardViewModel)
     }
 }
 
@@ -152,22 +162,33 @@ fun TextContainer(modifier: Modifier, screenContent: OnBoardInfo) {
 }
 
 @Composable
-fun FooterContainer(activeScreen: Int, modifier: Modifier) {
+fun FooterContainer(
+    activeScreen: Int,
+    modifier: Modifier,
+    navigation: NavHostController,
+    onBoardViewModel: OnBoardViewModel
+) {
     Row(modifier = modifier) {
         Spacer(modifier = Modifier.weight(1f))
         DotsContainer(modifier = Modifier.weight(1f), active = activeScreen)
-        Skip(modifier = Modifier.weight(1f))
+        Skip(
+            modifier = Modifier.weight(1f),
+            navigation = navigation,
+            onBoardViewModel = onBoardViewModel
+        )
     }
 }
 
 @Composable
-fun Skip(modifier: Modifier) {
+fun Skip(modifier: Modifier, navigation: NavHostController, onBoardViewModel: OnBoardViewModel) {
     Box(modifier = modifier) {
         Text(
             "OMITIR",
-            modifier = Modifier.align(Alignment.BottomEnd),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .clickable { onBoardViewModel.navigateToStudentSelector(navigation) },
             fontFamily = roboto_regular,
-            color = onBoard_footer
+            color = OnBoard_footer
         )
     }
 }
@@ -193,7 +214,7 @@ fun Dot(number: Int, active: Int) {
         modifier = Modifier.size(15.dp),
         border = BorderStroke(
             width = 2.dp,
-            if (number == active) Color(0xFFE30921) else onBoard_footer
+            if (number == active) Color(0xFFE30921) else OnBoard_footer
         ),
         backgroundColor = if (number == active) Color(0xFFE30921) else Color.Transparent,
         content = {}

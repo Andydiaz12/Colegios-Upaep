@@ -11,5 +11,7 @@ val Placeholders = Color(0xFFBFBFBF)
 val Messages_red = Color(0xFFE30921)
 val Input_border = Color(0xFFB5BABD)
 val OnBoard_footer = Color(0xFF909496)
-val Preschool_color
-val Primary_color
+val Preschool_color = Color(0xFF6BB714)
+val Primary_color = Color(0xFFF9C430)
+val Middleschool_color = Color(0xFFEE6F03)
+val Dark_grey = Color(0xFF52565A)

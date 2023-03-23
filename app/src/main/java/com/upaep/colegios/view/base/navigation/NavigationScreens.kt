@@ -10,6 +10,7 @@ import com.upaep.colegios.view.base.theme.ThemeSchema
 import com.upaep.colegios.view.features.login.LoginExtraScreen
 import com.upaep.colegios.view.features.login.LoginScreen
 import com.upaep.colegios.view.features.onboard.OnBoardScreen
+import com.upaep.colegios.view.features.studentselector.StudentSelectorScreen
 
 @Composable
 fun AppNavigation(theme: ThemeSchema) {
@@ -29,7 +30,10 @@ fun AppNavigation(theme: ThemeSchema) {
             )
         }
         composable(Routes.OnBoardScreen.routes) {
-            OnBoardScreen()
+            OnBoardScreen(navigation = navigationController)
+        }
+        composable(Routes.StudentSelectorScreen.routes) {
+            StudentSelectorScreen()
         }
     }
 }
