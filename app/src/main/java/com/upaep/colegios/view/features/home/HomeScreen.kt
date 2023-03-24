@@ -1,6 +1,9 @@
 package com.upaep.colegios.viewmodel.features.home
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -14,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +37,9 @@ import com.upaep.colegios.view.base.theme.Dark_grey
 import com.upaep.colegios.view.base.theme.Messages_red
 import com.upaep.colegios.view.base.theme.Preschool_color
 import com.upaep.colegios.view.base.theme.roboto_black
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 
 @Preview(showSystemUi = true)
 @Composable
@@ -122,7 +129,16 @@ fun News(modifier: Modifier) {
     val pagerState = rememberPagerState()
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.size(30.dp))
-        Card(modifier = modifier, shape = RoundedCornerShape(10.dp), elevation = 3.dp) {
+        Card(
+            modifier = modifier.clickable(
+                indication = null,
+                interactionSource = MutableInteractionSource()
+            ) {
+                //navigation to screen with news complete
+              Log.i("clickingEvt", pagerState.currentPage.toString())
+              Log.i("clickingEvt", news[pagerState.currentPage].toString())
+            }, shape = RoundedCornerShape(10.dp), elevation = 3.dp
+        ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 HorizontalPager(
                     count = news.size,
