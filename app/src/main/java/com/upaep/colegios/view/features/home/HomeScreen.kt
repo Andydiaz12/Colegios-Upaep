@@ -11,13 +11,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,33 +25,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavHostController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import com.upaep.colegios.data.entities.announcements.Announcements
 import com.upaep.colegios.view.base.genericComponents.HeaderLeftLogo
+import com.upaep.colegios.view.base.genericComponents.HeaderRightTwoIcons
 import com.upaep.colegios.view.base.genericComponents.StudentCardInfo
-import com.upaep.colegios.view.base.theme.Dark_grey
-import com.upaep.colegios.view.base.theme.Messages_red
-import com.upaep.colegios.view.base.theme.Preschool_color
-import com.upaep.colegios.view.base.theme.roboto_black
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import com.upaep.colegios.view.base.navigation.Routes
+import com.upaep.colegios.view.base.theme.*
 
-@Preview(showSystemUi = true)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    theme: ThemeSchema,
+    studentName: String,
+    studentGroup: String,
+    studentGrade: String,
+    navigation: NavHostController
+) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (upperSection, lowerSection) = createRefs()
-        ContainerHeaderAndStudent(modifier = Modifier
-            .constrainAs(upperSection) {
-                top.linkTo(parent.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            }
-            .fillMaxWidth())
-        NewsAndFeatures(modifier = Modifier
+        ContainerHeaderAndStudent(
+            studentName = studentName,
+            studentGroup = studentGroup,
+            studentGrade = studentGrade,
+            modifier = Modifier
+                .constrainAs(upperSection) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+                .fillMaxWidth())
+        AnnouncementsAndFeatures(modifier = Modifier
             .constrainAs(lowerSection) {
                 top.linkTo(upperSection.bottom)
                 bottom.linkTo(parent.bottom)
@@ -61,20 +66,24 @@ fun HomeScreen() {
                 end.linkTo(parent.end)
                 height = Dimension.fillToConstraints
             }
-            .padding(start = 32.dp, end = 32.dp))
+            .padding(start = 32.dp, end = 32.dp), theme = theme, navigation = navigation)
     }
 
 }
 
 @Composable
-fun NewsAndFeatures(modifier: Modifier) {
+fun AnnouncementsAndFeatures(
+    theme: ThemeSchema,
+    modifier: Modifier,
+    navigation: NavHostController
+) {
     ConstraintLayout(modifier = modifier) {
-        val (news, features) = createRefs()
-        News(modifier = Modifier.constrainAs(news) {
+        val (announcements, features) = createRefs()
+        AnnouncementsSection(modifier = Modifier.constrainAs(announcements) {
             top.linkTo(parent.top)
-        })
+        }, theme = theme, navigation)
         Features(modifier = Modifier.constrainAs(features) {
-            top.linkTo(news.bottom)
+            top.linkTo(announcements.bottom)
             bottom.linkTo(parent.bottom)
             height = Dimension.fillToConstraints
         })
@@ -82,32 +91,49 @@ fun NewsAndFeatures(modifier: Modifier) {
 }
 
 @Composable
-fun ContainerHeaderAndStudent(modifier: Modifier) {
+fun ContainerHeaderAndStudent(
+    modifier: Modifier,
+    studentName: String,
+    studentGroup: String,
+    studentGrade: String
+) {
     Column(modifier = modifier.fillMaxWidth()) {
-        HeaderLeftLogo(modifier = modifier.padding(start = 32.dp, end = 32.dp))
-        StudentDescAndChange(modifier = Modifier.fillMaxWidth())
+        HeaderRightTwoIcons()
+        StudentDescAndChange(
+            studentName = studentName,
+            studentGroup = studentGroup,
+            studentGrade = studentGrade,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
 @Composable
-fun StudentDescAndChange(modifier: Modifier) {
+fun StudentDescAndChange(
+    modifier: Modifier,
+    studentName: String,
+    studentGroup: String,
+    studentGrade: String
+) {
+    val color = getColor(studentGrade = studentGrade)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Preschool_color)
-            .padding(end = 30.dp),
+            .background(color)
+            .padding(start = 30.dp, end = 30.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         StudentCardInfo(
-            studentName = "Cesar López Valeriano",
-            studentLevel = "Preescolar",
+            studentName = studentName,
+            studentLevel = studentGrade,
             levelColor = Color.White,
-            studentGroup = "3ºB",
+            studentGroup = studentGroup,
             selectorScreen = false,
-            backgroundColor = Preschool_color,
+            backgroundColor = color,
             defaultTextColor = Color.White,
-            imgSize = 80.dp
+            imgSize = 60.dp,
+            maxWidth = true
         )
         ChangeStudent(modifier = Modifier.padding(bottom = 27.dp))
     }
@@ -124,8 +150,8 @@ fun ChangeStudent(modifier: Modifier) {
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun News(modifier: Modifier) {
-    var news = getNews()
+fun AnnouncementsSection(modifier: Modifier, theme: ThemeSchema, navigation: NavHostController) {
+    var announcements = getAnnouncements()
     val pagerState = rememberPagerState()
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.size(30.dp))
@@ -135,16 +161,21 @@ fun News(modifier: Modifier) {
                 interactionSource = MutableInteractionSource()
             ) {
                 //navigation to screen with news complete
-              Log.i("clickingEvt", pagerState.currentPage.toString())
-              Log.i("clickingEvt", news[pagerState.currentPage].toString())
-            }, shape = RoundedCornerShape(10.dp), elevation = 3.dp
+                navigation.navigate(Routes.AnnouncementScreen.createRoute(announcements[pagerState.currentPage]))
+            },
+            shape = RoundedCornerShape(10.dp),
+            elevation = 3.dp,
+            backgroundColor = theme.backgroundColor
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 HorizontalPager(
-                    count = news.size,
+                    count = announcements.size,
                     state = pagerState
                 ) { page ->
-                    NewsContent(title = news[page].title, content = news[page].content)
+                    AnnouncementsContent(
+                        title = announcements[page].title,
+                        content = announcements[page].content
+                    )
                 }
                 HorizontalPagerIndicator(
                     pagerState = pagerState,
@@ -163,7 +194,7 @@ fun Features(modifier: Modifier) {
         Spacer(modifier = Modifier.size(50.dp))
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(70.dp)
+            verticalArrangement = Arrangement.spacedBy(50.dp)
         ) {
             items(getFeatures()) { features ->
                 IndividualFeature(featureName = features.featureName)
@@ -187,7 +218,7 @@ fun IndividualFeature(featureName: String) {
 }
 
 @Composable
-fun NewsContent(title: String, content: String) {
+fun AnnouncementsContent(title: String, content: String) {
     Column(
         modifier = Modifier.padding(top = 15.dp, start = 30.dp, end = 30.dp, bottom = 15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -203,15 +234,10 @@ fun NewsContent(title: String, content: String) {
     }
 }
 
-data class News(
-    val title: String,
-    val content: String
-)
-
-fun getNews(): List<News> {
+fun getAnnouncements(): List<Announcements> {
     return listOf(
-        News(title = "Aviso 2", content = "Contenido 2"),
-        News(
+        Announcements(title = "Aviso 2", content = "Contenido 2"),
+        Announcements(
             title = "Avisos",
             content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
         )
@@ -233,4 +259,21 @@ fun getFeatures(): List<Feature> {
         Feature(featureName = "Boletín"),
         Feature(featureName = "Círculo familiar"),
     )
+}
+
+fun getColor(studentGrade: String): Color {
+    return when (studentGrade) {
+        "Preescolar" -> {
+            Preschool_color
+        }
+        "Primaria" -> {
+            Primary_color
+        }
+        "Secundaria" -> {
+            Middleschool_color
+        }
+        else -> {
+            Color.Transparent
+        }
+    }
 }

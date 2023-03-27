@@ -123,7 +123,7 @@ fun BackgroundImage(modifier: Modifier) {
         modifier = modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(0.dp, 0.dp, 250.dp, 250.dp))
-            .background(Color(0xFF6BB714).copy(alpha = 1f))
+            .background(Color(0xFFCEF5A2))
     )
 }
 

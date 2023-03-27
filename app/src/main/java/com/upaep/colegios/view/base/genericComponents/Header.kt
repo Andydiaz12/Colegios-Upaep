@@ -3,10 +3,7 @@ package com.upaep.colegios.view.base.genericComponents
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
@@ -32,7 +29,8 @@ fun Header(
 ) {
     Row(
         modifier = modifier
-            .height(100.dp)
+            .background(Color.White)
+            .padding(18.dp)
     ) {
         Box(modifier = Modifier.weight(1f)) {
             Icon(
@@ -40,7 +38,7 @@ fun Header(
                 contentDescription = "atrás",
                 tint = Messages_red,
                 modifier = Modifier.clickable {
-                    if(navigationPrev) {
+                    if (navigationPrev) {
                         navigation?.popBackStack()
                     }
                 }
@@ -75,6 +73,7 @@ fun _Header() {
     Row(
         modifier = Modifier
             .height(100.dp)
+            .background(Color.White)
     ) {
         Box(modifier = Modifier.weight(1f)) {
             Icon(

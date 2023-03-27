@@ -42,7 +42,6 @@ fun LoginExtraScreen(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
     ) {
         val (header, imageContainer, informationContainer, mailInput, footer) = createRefs()
         val middleGuideLine = createGuidelineFromTop(if (blockedScreen) 0.75f else 0.5f)

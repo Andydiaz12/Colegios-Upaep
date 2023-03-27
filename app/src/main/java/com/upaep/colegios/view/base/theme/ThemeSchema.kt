@@ -6,7 +6,8 @@ import com.upaep.colegios.R
 sealed class ThemeSchema(
     val backgroundColor: Color,
     val textColor: Color,
-    val placeholderColor: Color = Color(0xFF52565A)
+    val placeholderColor: Color = Color(0xFF52565A),
+    val backgroundImage: Int = R.drawable.white_background
 ) {
     object LIGHT : ThemeSchema(
         backgroundColor = Color.White,

@@ -1,21 +1,15 @@
 package com.upaep.colegios.view.features.studentselector
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,27 +17,25 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.upaep.colegios.R
+import androidx.navigation.NavHostController
 import com.upaep.colegios.data.entities.studentselector.StudentsSelector
-import com.upaep.colegios.view.base.genericComponents.HeaderLeftLogo
+import com.upaep.colegios.view.base.genericComponents.Header
 import com.upaep.colegios.view.base.genericComponents.StudentCardInfo
 import com.upaep.colegios.view.base.theme.*
 import com.upaep.colegios.viewmodel.features.studentselector.StudentSelectorViewModel
 
 @Composable
 fun StudentSelectorScreen(
+    navigation: NavHostController,
     studentSelectorViewModel: StudentSelectorViewModel = hiltViewModel()
 ) {
     ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 32.dp, end = 32.dp, bottom = 125.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
         val (header, message, students) = createRefs()
-        HeaderLeftLogo(modifier = Modifier.constrainAs(header) {
+        Header(modifier = Modifier.constrainAs(header) {
             top.linkTo(parent.top)
-            bottom.linkTo(message.top)
-        })
+        }, visibleImage = false, visibleMenu = false)
         MessageContainer(modifier = Modifier.constrainAs(message) {
             top.linkTo(header.bottom)
             bottom.linkTo(students.top)
@@ -54,13 +46,20 @@ fun StudentSelectorScreen(
             height = Dimension.fillToConstraints
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        }, studentSelectorViewModel = studentSelectorViewModel)
+        }, studentSelectorViewModel = studentSelectorViewModel, navigation = navigation)
     }
 }
 
 @Composable
-fun StudentsContainer(modifier: Modifier, studentSelectorViewModel: StudentSelectorViewModel) {
-    LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+fun StudentsContainer(
+    modifier: Modifier,
+    studentSelectorViewModel: StudentSelectorViewModel,
+    navigation: NavHostController?
+) {
+    LazyColumn(
+        modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 50.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
         items(studentSelectorViewModel.getStudents()) { student ->
             var levelColor: Color = Color.Transparent
             when (student.level) {
@@ -74,7 +73,12 @@ fun StudentsContainer(modifier: Modifier, studentSelectorViewModel: StudentSelec
                     levelColor = Middleschool_color
                 }
             }
-            StudentCard(student.name, student.level, student.group, levelColor = levelColor)
+            StudentCard(
+                student,
+                levelColor = levelColor,
+                studentSelectorViewModel = studentSelectorViewModel,
+                navigation = navigation
+            )
         }
     }
 }
@@ -83,7 +87,8 @@ fun StudentsContainer(modifier: Modifier, studentSelectorViewModel: StudentSelec
 fun MessageContainer(modifier: Modifier) {
     Column(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(start = 32.dp, end = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.size(50.dp))
@@ -110,12 +115,25 @@ fun MessageContainer(modifier: Modifier) {
 
 @Composable
 fun StudentCard(
-    studentName: String,
-    studentLevel: String,
-    studentGroup: String,
-    levelColor: Color
+    student: StudentsSelector,
+    levelColor: Color,
+    studentSelectorViewModel: StudentSelectorViewModel,
+    navigation: NavHostController?
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        StudentCardInfo(studentName = studentName, studentLevel = studentLevel, levelColor = levelColor, studentGroup = studentGroup)
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .clickable {
+            studentSelectorViewModel.navigateToHomeScreen(
+                navigation = navigation,
+                student = student
+            )
+        }, elevation = 5.dp
+    ) {
+        StudentCardInfo(
+            studentName = student.name,
+            studentLevel = student.level,
+            levelColor = levelColor,
+            studentGroup = student.group
+        )
     }
 }

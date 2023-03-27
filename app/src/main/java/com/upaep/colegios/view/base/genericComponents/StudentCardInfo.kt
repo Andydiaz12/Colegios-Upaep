@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.upaep.colegios.R
@@ -29,7 +30,8 @@ fun StudentCardInfo(
     studentGroup: String,
     selectorScreen: Boolean = true,
     defaultTextColor: Color = Dark_grey,
-    imgSize: Dp = 100.dp
+    imgSize: Dp = 100.dp,
+    maxWidth: Boolean = false
 ) {
     Row(
         modifier = Modifier
@@ -48,7 +50,14 @@ fun StudentCardInfo(
                 .clip(CircleShape)
         )
         Column() {
-            Text(studentName, fontFamily = roboto_black, color = defaultTextColor)
+            Text(
+                studentName,
+                fontFamily = roboto_black,
+                color = defaultTextColor,
+                modifier = if (maxWidth) Modifier.widthIn(min = 0.dp, max = 200.dp) else Modifier,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(modifier = Modifier.size(12.dp))
             Row() {
                 if (selectorScreen) {
