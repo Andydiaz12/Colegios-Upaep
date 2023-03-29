@@ -15,11 +15,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.upaep.colegios.view.base.navigation.Routes
 import com.upaep.colegios.view.base.theme.Messages_red
 
-@Preview(showSystemUi = true)
 @Composable
-fun HeaderRightTwoIcons() {
+fun HeaderRightTwoIcons(
+    navigation: NavHostController,
+    navigationPrev: Boolean = true
+) {
     val visibleMenu = true;
     Row(
         modifier = Modifier
@@ -32,9 +36,9 @@ fun HeaderRightTwoIcons() {
                 contentDescription = "atrás",
                 tint = Messages_red,
                 modifier = Modifier.clickable {
-                    /*if (navigationPrev) {
-                        navigation?.popBackStack()
-                    }*/
+                    if (navigationPrev) {
+                        navigation.popBackStack()
+                    }
                 }
             )
         }
@@ -42,7 +46,7 @@ fun HeaderRightTwoIcons() {
         if (visibleMenu) {
             Box(modifier = Modifier.weight(1f)) {
                 Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-                    if(false) {
+                    if (false) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "notificaciones"
@@ -52,7 +56,10 @@ fun HeaderRightTwoIcons() {
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         contentDescription = "menú",
-                        tint = Messages_red
+                        tint = Messages_red,
+                        modifier = Modifier.clickable {
+                            navigation.navigate(Routes.MenuScreen.routes)
+                        }
                     )
                 }
             }

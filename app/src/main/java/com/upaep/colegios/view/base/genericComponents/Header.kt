@@ -17,7 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.upaep.colegios.R
+import com.upaep.colegios.view.base.navigation.Routes
 import com.upaep.colegios.view.base.theme.Messages_red
+import okhttp3.Route
 
 @Composable
 fun Header(
@@ -48,7 +50,9 @@ fun Header(
             Icon(
                 imageVector = Icons.Filled.Image,
                 contentDescription = "colegios upaep",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).clickable {
+                    navigation?.navigate(Routes.MenuScreen.routes)
+                }
             )
         } else {
             Spacer(modifier = Modifier.weight(1f))

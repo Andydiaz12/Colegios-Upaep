@@ -48,6 +48,7 @@ fun HomeScreen(
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (upperSection, lowerSection) = createRefs()
         ContainerHeaderAndStudent(
+            navigation = navigation,
             studentName = studentName,
             studentGroup = studentGroup,
             studentGrade = studentGrade,
@@ -92,13 +93,14 @@ fun AnnouncementsAndFeatures(
 
 @Composable
 fun ContainerHeaderAndStudent(
+    navigation: NavHostController,
     modifier: Modifier,
     studentName: String,
     studentGroup: String,
     studentGrade: String
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        HeaderRightTwoIcons()
+        HeaderRightTwoIcons(navigation = navigation)
         StudentDescAndChange(
             studentName = studentName,
             studentGroup = studentGroup,

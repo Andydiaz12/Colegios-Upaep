@@ -20,4 +20,5 @@ sealed class Routes(val routes: String, val screenName: String = "") {
         fun createRoute(announcement: Announcements) =
             "announcementScreen/${announcement.title}/${announcement.content}"
     }
+    object MenuScreen: Routes("menuScreen")
 }

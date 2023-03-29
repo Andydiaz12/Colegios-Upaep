@@ -95,7 +95,7 @@ fun ButtonContainer(
 ) {
     Column(modifier = modifier) {
         RedButton("ENTRAR") {
-            navigation.navigate(Routes.OnBoardScreen.routes)
+            loginViewModel.doLogin(navigation)
         }
         LoginButtonsSeparation()
         GoogleButton(onButtonClicked = {

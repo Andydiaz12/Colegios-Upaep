@@ -49,29 +49,35 @@ fun LoginExtraScreen(
             top.linkTo(parent.top)
         }, visibleMenu = false, visibleImage = false, navigation = navigation)
         if (blockedScreen) {
-            ImageContainer(modifier = Modifier.constrainAs(imageContainer) {
-                top.linkTo(header.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                bottom.linkTo(informationContainer.top)
-            })
+            ImageContainer(modifier = Modifier
+                .constrainAs(imageContainer) {
+                    top.linkTo(header.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(informationContainer.top)
+                }
+                .padding(start = 32.dp, end = 32.dp, top = 125.dp))
         }
-        InformationContainer(modifier = Modifier.constrainAs(informationContainer) {
-            if (blockedScreen) {
-                top.linkTo(imageContainer.bottom)
+        InformationContainer(modifier = Modifier
+            .constrainAs(informationContainer) {
+                if (blockedScreen) {
+                    top.linkTo(imageContainer.bottom)
+                }
+                bottom.linkTo(mailInput.top)
             }
-            bottom.linkTo(mailInput.top)
-        }, titleText = titleText, contentText = contentText)
+            .padding(start = 32.dp, end = 32.dp),
+            titleText = titleText,
+            contentText = contentText)
         if (!blockedScreen) {
             MailInput(modifier = Modifier.constrainAs(mailInput) {
                 bottom.linkTo(middleGuideLine)
-            }, theme = theme, onValueChange = {
+            }.padding(start = 32.dp, end = 32.dp), theme = theme, onValueChange = {
                 LoginExtraViewModel.updateMail(it)
             }, mail = mail)
         }
         FooterContainer(modifier = Modifier.constrainAs(footer) {
             bottom.linkTo(parent.bottom)
-        })
+        }.padding(start = 32.dp, end = 32.dp, bottom = 32.dp))
     }
 }
 
