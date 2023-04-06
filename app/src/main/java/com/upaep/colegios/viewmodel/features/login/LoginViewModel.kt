@@ -7,13 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.upaep.colegios.data.domain.login.DoLoginUseCase
+import com.upaep.colegios.data.domain.login.HeaderTestCase
+import com.upaep.colegios.view.base.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val doLoginUseCase: DoLoginUseCase
+    private val doLoginUseCase: DoLoginUseCase,
+    private val headerTestCase: HeaderTestCase
 ) : ViewModel() {
     private val _visiblePassword = MutableLiveData(false)
     val visiblePassword: LiveData<Boolean> = _visiblePassword
@@ -29,7 +32,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun updateDate(data: String, input: String) {
-        when(input) {
+        when (input) {
             "password" -> {
                 _passwordInput.value = data
             }
@@ -40,10 +43,16 @@ class LoginViewModel @Inject constructor(
     }
 
     fun doLogin(navigation: NavHostController) {
+//        viewModelScope.launch {
+//            val execLogin = doLoginUseCase()
+//            Log.i("loginDebug", execLogin.toString())
+//        }
+        navigation.navigate(Routes.OnBoardScreen.routes)
+    }
+
+    fun testResponse() {
         viewModelScope.launch {
-            val execLogin = doLoginUseCase()
-            Log.i("loginDebug", execLogin.toString())
-            //navigation.navigate(Routes.OnBoardScreen.routes)
+            val execTest = headerTestCase()
         }
     }
 }

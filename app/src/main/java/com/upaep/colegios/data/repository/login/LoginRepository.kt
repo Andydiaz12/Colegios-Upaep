@@ -23,4 +23,8 @@ class LoginRepository @Inject constructor(
     suspend fun deleteSession() {
         loginDao.deleteSession()
     }
+
+    suspend fun headerTestCase() {
+        return loginService.headerTest()
+    }
 }
