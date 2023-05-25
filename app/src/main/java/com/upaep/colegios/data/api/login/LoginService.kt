@@ -20,15 +20,4 @@ class LoginService @Inject constructor(private val api: ColegiosInterface) {
             }
         }
     }
-
-    suspend fun headerTest() {
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = api.testHeader()
-                response.body() ?: UpaepStandardResponse()
-            } catch(e: IOException) {
-                UpaepStandardResponse()
-            }
-        }
-    }
 }

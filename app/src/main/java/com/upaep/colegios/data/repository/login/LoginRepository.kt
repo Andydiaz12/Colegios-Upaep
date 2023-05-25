@@ -1,7 +1,7 @@
 package com.upaep.colegios.data.repository.login
 
 import com.upaep.colegios.data.api.login.LoginService
-import com.upaep.colegios.data.base.room.logindao.LoginDao
+import com.upaep.colegios.data.database.logindao.LoginDao
 import com.upaep.colegios.data.entities.login.UserData
 import com.upaep.colegios.data.entities.upaepservices.UpaepStandardResponse
 import javax.inject.Inject
@@ -14,17 +14,5 @@ class LoginRepository @Inject constructor(
 ) {
     suspend fun doLogin() : UpaepStandardResponse {
         return loginService.doLogin()
-    }
-
-    suspend fun createSession(userData: UserData) {
-        loginDao.createSession(userData)
-    }
-
-    suspend fun deleteSession() {
-        loginDao.deleteSession()
-    }
-
-    suspend fun headerTestCase() {
-        return loginService.headerTest()
     }
 }

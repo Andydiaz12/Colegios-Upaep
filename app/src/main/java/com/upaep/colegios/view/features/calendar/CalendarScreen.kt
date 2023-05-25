@@ -1,21 +1,21 @@
 package com.upaep.colegios.view.features.calendar
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -23,96 +23,213 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.upaep.colegios.data.entities.calendar.GoogleEvents
+import com.upaep.colegios.view.base.genericComponents.Header
+import com.upaep.colegios.view.base.theme.Background
+import com.upaep.colegios.view.base.theme.Dark_grey
+import com.upaep.colegios.view.base.theme.Tenue_gray
+import com.upaep.colegios.view.base.theme.Upaep_grey
+import com.upaep.colegios.view.base.theme.Upaep_red
+import com.upaep.colegios.view.base.theme.firasans_bold
+import com.upaep.colegios.view.base.theme.roboto_black
+import com.upaep.colegios.view.base.theme.roboto_regular
 import com.upaep.colegios.viewmodel.features.calendar.CalendarViewModel
 import java.text.DateFormatSymbols
 
-@Preview(showSystemUi = true)
 @Composable
-fun CalendarScreen() {
-    val calendarViewModel = CalendarViewModel()
+fun CalendarScreen(
+    calendarViewModel: CalendarViewModel = hiltViewModel(),
+    navigation: NavHostController
+) {
+    val levelColor by calendarViewModel.levelColor.observeAsState(Color.Transparent)
+    val childName by calendarViewModel.childName.observeAsState()
+    val googleEvents by calendarViewModel.calendarEvents.observeAsState(emptyList())
+    val daysWithEvents by calendarViewModel.daysWithEvents.observeAsState(emptyList())
+    var selectedDay by rememberSaveable { mutableStateOf(0) }
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        CompleteCalendarContainer(
-            calendarViewModel = calendarViewModel,
-            modifier = Modifier.padding(32.dp)
-        )
+        val (header, card) = createRefs()
+        Header(screenName = "CALENDARIO", modifier = Modifier.constrainAs(header) {
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }, nameBackgroundColor = levelColor, childName = childName, navigation = navigation)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .constrainAs(card) {
+                    top.linkTo(header.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                    height = Dimension.fillToConstraints
+                }
+                .padding(top = 20.dp)
+        ) {
+            item {
+                CompleteCalendarContainer(
+                    calendarViewModel = calendarViewModel,
+                    events = googleEvents,
+                    daysWithEvents = daysWithEvents,
+                    clickedDay = { selectedDay = it },
+                    selectedDay = selectedDay,
+                    levelColor = levelColor
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun CompleteCalendarContainer(calendarViewModel: CalendarViewModel, modifier: Modifier) {
-    Column(modifier = modifier) {
-        ContainerLevelName()
-        CalendarContainer(calendarViewModel = calendarViewModel)
-        Divider(modifier = Modifier.padding(vertical = 25.dp))
-        EventDescriptionContainer()
-    }
-}
-
-@Composable
-fun ContainerLevelName() {
-    Text(
-        text = "PRIMARIA PRESENCIAL",
+fun CompleteCalendarContainer(
+    calendarViewModel: CalendarViewModel,
+    events: List<GoogleEvents>,
+    daysWithEvents: List<Int>,
+    clickedDay: (Int) -> Unit,
+    selectedDay: Int,
+    levelColor: Color
+) {
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Red)
-            .padding(vertical = 15.dp, horizontal = 10.dp),
-        color = Color.White
-    )
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(vertical = 20.dp, horizontal = 15.dp)
+        ) {
+            CalendarContainer(
+                calendarViewModel = calendarViewModel,
+                daysWithEvents = daysWithEvents,
+                clickedDay = clickedDay,
+                selectedDay = selectedDay,
+                levelColor = levelColor
+            )
+            Divider(modifier = Modifier.padding(vertical = 25.dp), color = Tenue_gray)
+            EventDescriptionContainer(
+                events = events,
+                selectedDay = selectedDay,
+                calendarViewModel = calendarViewModel
+            )
+        }
+    }
 }
 
 @Composable
-fun CalendarContainer(calendarViewModel: CalendarViewModel) {
+fun CalendarContainer(
+    calendarViewModel: CalendarViewModel,
+    daysWithEvents: List<Int>,
+    clickedDay: (Int) -> Unit,
+    selectedDay: Int,
+    levelColor: Color
+) {
     val calendarConfig by calendarViewModel.calendarConfiguration.observeAsState(calendarViewModel.getCalendarConfiguration())
     val actualMonth = calendarViewModel.getActualMonth()
+    val actualDay = calendarViewModel.getActualDay()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CalendarMonthContainer(
             monthName = calendarConfig.monthName,
-            calendarViewModel = calendarViewModel
+            calendarViewModel = calendarViewModel,
+            year = calendarConfig.yearInInt.toString()
         )
+        Spacer(modifier = Modifier.size(20.dp))
         CalendarUpaep(
             startDay = calendarConfig.startDay,
             numRows = calendarConfig.numRows,
             daysMatrix = calendarConfig.daysMatrix,
-            actualMonth = actualMonth
+            monthSelected = calendarConfig.monthNumber,
+            actualMonth = actualMonth,
+            actualDay = actualDay,
+            daysWithEvents = daysWithEvents,
+            clickedDay = clickedDay,
+            selectedDay = selectedDay,
+            levelColor = levelColor
         )
     }
 }
 
 @Composable
-fun EventDescriptionContainer() {
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items(4) { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
-            ) {
-                EventDot(dotSize = 10.dp, modifier = Modifier.padding(top = 5.dp))
-                Spacer(modifier = Modifier.size(8.dp))
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Consejo Técnico Escolar / Suspensión de clase así que no vengan",
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(text = "16 mar 2023 - 17 mar 2023", fontWeight = FontWeight.Light)
+fun EventDescriptionContainer(
+    events: List<GoogleEvents>,
+    selectedDay: Int,
+    calendarViewModel: CalendarViewModel
+) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        if (!calendarViewModel.getIfEventsInDay(selectedDay)) {
+            Text(
+                "EVENTOS",
+                modifier = Modifier.padding(start = 8.dp),
+                color = Upaep_red,
+                fontFamily = roboto_black
+            )
+        }
+        events.forEach() { event ->
+            if (calendarViewModel.dayWithinRange(selectedDay = selectedDay, event = event)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)
+                ) {
+                    EventDot(dotSize = 6.dp, modifier = Modifier.padding(top = 5.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = event.summary ?: "",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "${event.startDateDesc} - ${event.endDateDesc}",
+                            fontWeight = FontWeight.Light,
+                            color = Color.Black,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         }
+        if (calendarViewModel.getIfEventsInDay(selectedDay)) {
+            NoneEvents()
+        }
+    }
+}
 
+@Composable
+fun NoneEvents() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Text(
+            text = "No tienes eventos para este día",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(50.dp),
+            color = Upaep_grey,
+            fontFamily = roboto_regular,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
 
 @Composable
-fun CalendarMonthContainer(monthName: String, calendarViewModel: CalendarViewModel) {
+fun CalendarMonthContainer(monthName: String, calendarViewModel: CalendarViewModel, year: String) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 18.dp),
+            .clip(shape = RoundedCornerShape(50))
+            .background(Background)
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         MonthMovement(
@@ -121,7 +238,7 @@ fun CalendarMonthContainer(monthName: String, calendarViewModel: CalendarViewMod
             movement = "prev",
             movementDesc = "anterior"
         )
-        MonthName(monthName = monthName, modifier = Modifier.weight(5f))
+        MonthName(monthName = monthName, modifier = Modifier.weight(5f), year = year)
         MonthMovement(
             modifier = Modifier.weight(1f),
             calendarViewModel = calendarViewModel,
@@ -140,20 +257,40 @@ fun MonthMovement(
 ) {
     Icon(
         modifier = modifier
+            .size(30.dp)
             .rotate(degrees = if (movement == "prev") 180f else 0f)
             .clickable { calendarViewModel.getOtherMonth(movement = movement) },
         imageVector = Icons.Default.ArrowRight,
-        contentDescription = "mes ${movementDesc}"
+        contentDescription = "mes ${movementDesc}",
+        tint = Upaep_red
     )
 }
 
 @Composable
-fun MonthName(monthName: String, modifier: Modifier) {
-    Text(text = monthName, modifier = modifier, textAlign = TextAlign.Center)
+fun MonthName(monthName: String, modifier: Modifier, year: String) {
+    Text(
+        text = "$monthName $year",
+        modifier = modifier,
+        textAlign = TextAlign.Center,
+        fontFamily = firasans_bold,
+        fontSize = 16.sp,
+        color = Color.Black
+    )
 }
 
 @Composable
-fun CalendarUpaep(startDay: Int, numRows: Int, daysMatrix: Array<IntArray>, actualMonth: Int) {
+fun CalendarUpaep(
+    startDay: Int,
+    numRows: Int,
+    daysMatrix: Array<IntArray>,
+    actualMonth: Int,
+    actualDay: Int,
+    monthSelected: Int,
+    daysWithEvents: List<Int>,
+    clickedDay: (Int) -> Unit,
+    selectedDay: Int,
+    levelColor: Color
+) {
     Column() {
         Row(Modifier.fillMaxWidth()) {
             for (i in 0 until 7) {
@@ -162,10 +299,13 @@ fun CalendarUpaep(startDay: Int, numRows: Int, daysMatrix: Array<IntArray>, actu
                     text = DateFormatSymbols().shortWeekdays[dayOfWeek].uppercase().substring(0, 1),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = Upaep_red,
+                    fontFamily = firasans_bold
                 )
             }
         }
+        Spacer(modifier = Modifier.size(10.dp))
         for (row in 0 until numRows) {
             Row(Modifier.fillMaxWidth()) {
                 for (col in 0 until 7) {
@@ -175,6 +315,14 @@ fun CalendarUpaep(startDay: Int, numRows: Int, daysMatrix: Array<IntArray>, actu
                             modifier = Modifier
                                 .weight(1f)
                                 .height(45.dp)
+                                .padding(4.dp)
+                                .clip(RoundedCornerShape(50.dp))
+                                .background(
+                                    if (selectedDay == dayOfMonth) levelColor
+                                    else if (daysWithEvents.size > dayOfMonth && daysWithEvents[dayOfMonth] == 1) Background
+                                    else Color.Transparent
+                                )
+                                .clickable { clickedDay(dayOfMonth) }
                         ) {
                             Column(
                                 modifier = Modifier.align(Alignment.Center),
@@ -182,12 +330,14 @@ fun CalendarUpaep(startDay: Int, numRows: Int, daysMatrix: Array<IntArray>, actu
                             ) {
                                 Text(
                                     text = dayOfMonth.toString(),
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    fontFamily = if ((actualDay == dayOfMonth && actualMonth == monthSelected) || selectedDay == dayOfMonth) roboto_black else roboto_regular,
+                                    color =
+                                    if (selectedDay == dayOfMonth) Color.White
+                                    else if (actualDay == dayOfMonth && actualMonth == monthSelected) Color.Black
+                                    else if (daysWithEvents.size > dayOfMonth && daysWithEvents[dayOfMonth] == 1) levelColor
+                                    else Dark_grey
                                 )
-                                if (true) {
-                                    Spacer(modifier = Modifier.size(3.dp))
-                                    EventDot(dotSize = 5.dp)
-                                }
                             }
                         }
                     } else {

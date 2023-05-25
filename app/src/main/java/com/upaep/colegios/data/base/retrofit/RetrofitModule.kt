@@ -13,13 +13,16 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class RetrofitModule {
+
     @Singleton
     @Provides
-    fun provideRetrofit(): Retrofit {
+    fun provideRetrofit(myServiceInterceptor: MyServiceInterceptor): Retrofit {
+        val interceptor: OkHttpClient =
+            OkHttpClient.Builder().addInterceptor(myServiceInterceptor).build()
         return Retrofit.Builder()
-//            .baseUrl("https://mocki.io/v1/")
-            .baseUrl("https://api.upaep.mx/services/")
+            .baseUrl("https://apipruebas.upaep.mx/services/")
             .addConverterFactory(GsonConverterFactory.create())
+            .client(interceptor)
             .build()
     }
 

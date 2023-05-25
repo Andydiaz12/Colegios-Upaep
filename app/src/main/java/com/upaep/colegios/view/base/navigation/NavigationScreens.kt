@@ -8,17 +8,28 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.upaep.colegios.view.base.theme.ThemeSchema
 import com.upaep.colegios.view.features.announcements.AnnouncementsScreen
+import com.upaep.colegios.view.features.calendar.CalendarScreen
+import com.upaep.colegios.view.features.grades.AllGradesScreen
 import com.upaep.colegios.view.features.login.LoginExtraScreen
 import com.upaep.colegios.view.features.login.LoginScreen
 import com.upaep.colegios.view.features.menu.MenuScreen
 import com.upaep.colegios.view.features.onboard.OnBoardScreen
 import com.upaep.colegios.view.features.studentselector.StudentSelectorScreen
-import com.upaep.colegios.viewmodel.features.home.HomeScreen
+import com.upaep.colegios.view.features.home.HomeScreen
+import com.upaep.colegios.view.features.schedule.ScheduleCard
+import com.upaep.colegios.view.features.schedule.ScheduleScreen
+import com.upaep.colegios.view.features.splash.SplashScreen
 
 @Composable
 fun AppNavigation(theme: ThemeSchema) {
     val navigationController = rememberNavController()
-    NavHost(navController = navigationController, startDestination = Routes.LoginScreen.routes) {
+    NavHost(navController = navigationController, startDestination = Routes.SplashScreen.routes) {
+        composable(Routes.GradesScreen.routes) {
+            AllGradesScreen()
+        }
+        composable(Routes.SplashScreen.routes) {
+            SplashScreen(navigation = navigationController)
+        }
         composable(Routes.LoginScreen.routes) {
             LoginScreen(theme = theme, navigation = navigationController)
         }
@@ -38,18 +49,8 @@ fun AppNavigation(theme: ThemeSchema) {
         composable(Routes.StudentSelectorScreen.routes) {
             StudentSelectorScreen(navigation = navigationController)
         }
-        composable(Routes.HomeScreen.routes, arguments = listOf(
-            navArgument("studentName") { type = NavType.StringType },
-            navArgument("studentGrade") { type = NavType.StringType },
-            navArgument("studentGroup") { type = NavType.StringType }
-        )) { backStackEntry ->
-            HomeScreen(
-                studentGrade = backStackEntry.arguments!!.getString("studentGrade").toString(),
-                studentGroup = backStackEntry.arguments!!.getString("studentGroup").toString(),
-                studentName = backStackEntry.arguments!!.getString("studentName").toString(),
-                theme = theme,
-                navigation = navigationController
-            )
+        composable(Routes.HomeScreen.routes) {
+            HomeScreen(theme = theme, navigation = navigationController)
         }
         composable(Routes.AnnouncementScreen.routes, arguments = listOf(
             navArgument("title") { type = NavType.StringType },
@@ -64,6 +65,12 @@ fun AppNavigation(theme: ThemeSchema) {
         }
         composable(Routes.MenuScreen.routes) {
             MenuScreen(navigation = navigationController)
+        }
+        composable(Routes.CalendarScreen.routes) {
+            CalendarScreen(navigation = navigationController)
+        }
+        composable(Routes.ScheduleScreen.routes) {
+            ScheduleScreen()
         }
     }
 }

@@ -1,222 +1,242 @@
 package com.upaep.colegios.view.features.onboard
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.with
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.Divider
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.upaep.colegios.data.entities.onboard.OnBoardInfo
-import com.upaep.colegios.view.base.theme.OnBoard_footer
-import com.upaep.colegios.view.base.theme.roboto_black
-import com.upaep.colegios.view.base.theme.roboto_medium
-import com.upaep.colegios.view.base.theme.roboto_regular
+import com.upaep.colegios.view.base.theme.*
 import com.upaep.colegios.viewmodel.features.onboard.OnBoardViewModel
 
+@Preview(showSystemUi = true)
 @Composable
-fun OnBoardScreen(
-    onBoardViewModel: OnBoardViewModel = hiltViewModel(),
-    navigation: NavHostController
-) {
-    val actualScreen by onBoardViewModel.actualScreen.observeAsState(initial = 1)
-    val screenContent = onBoardViewModel.screensContent
-    ConstraintLayout() {
-        val backgroundLimit = createGuidelineFromBottom(0.17F)
-        val background = createRef()
-        BackgroundImage(modifier = Modifier.constrainAs(background) {
-            bottom.linkTo(backgroundLimit)
-        })
-        ScreenContent(
-            onBoardViewModel = onBoardViewModel,
-            actualScreen = actualScreen,
-            screenContent = screenContent,
-            navigation = navigation
-        )
-    }
+fun TestOnBoarding() {
+    OnBoardScreen(navigation = rememberNavController())
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ScreenContent(
-    onBoardViewModel: OnBoardViewModel,
-    actualScreen: Int,
-    screenContent: List<OnBoardInfo>,
-    navigation: NavHostController
+fun OnBoardScreen(
+    navigation: NavHostController,
+    onBoardViewModel: OnBoardViewModel = hiltViewModel()
 ) {
-    ConstraintLayout(
-        modifier = Modifier
+    val pageContent = onBoardViewModel.getScreensInfo()
+    val actualPage by onBoardViewModel.actualPage.observeAsState(0)
+    val scrollLeft by onBoardViewModel.scrollDirectionLeft.observeAsState(false)
+    var isDragging by remember { mutableStateOf(false) }
+    var posibleUpdate by rememberSaveable { mutableStateOf(true) }
+    AnimatedContent(
+        targetState = actualPage,
+        modifier = Modifier.fillMaxSize(),
+        transitionSpec = {
+            slideIntoContainer(
+                animationSpec = tween(durationMillis = 1000),
+                towards = if(scrollLeft) AnimatedContentScope.SlideDirection.End else AnimatedContentScope.SlideDirection.Start
+            ).with(
+                slideOutOfContainer(
+                    animationSpec = tween(durationMillis = 1000),
+                    towards = if(scrollLeft) AnimatedContentScope.SlideDirection.End else AnimatedContentScope.SlideDirection.Start
+                )
+            )
+        }
+    ) { targetState ->
+        ConstraintLayout(modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
             .onGloballyPositioned { coordinates ->
-                onBoardViewModel.updateConstraintWidth(coordinates.size.width.toFloat())
+                onBoardViewModel.setMiddleofComponent(coordinates.size.width / 2)
             }
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        val x = dragAmount.x
-                        when {
-                            x > 0 -> {
-                                onBoardViewModel.updateRightSwipe(false)
-                            } // right
-                            x < 0 -> {
-                                onBoardViewModel.updateRightSwipe(true)
-                            } // left
-                        }
+                    onDragStart = {
+                        posibleUpdate = true
+                        isDragging = true
                     },
                     onDragEnd = {
-                        onBoardViewModel.navigateOnBoard(navigation = navigation)
+                        isDragging = false
+                    }, onDrag = { change, dragAmount ->
+                        val x = dragAmount.x
+                        change.consume()
+                        if (posibleUpdate) {
+                            when {
+                                x > 0 -> {
+                                    onBoardViewModel.changeOnBoardingScreen(
+                                        value = -1,
+                                        navigation = navigation
+                                    )
+                                }
+                                x < 0 -> {
+                                    onBoardViewModel.changeOnBoardingScreen(
+                                        value = 1,
+                                        navigation = navigation
+                                    )
+                                }
+                            }
+                            posibleUpdate = false
+                        }
                     }
                 )
             }
             .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {},
-                    onTap = { tapCoordenate ->
-                        onBoardViewModel.tappingEvent(
-                            tapOnX = tapCoordenate.x,
+                detectTapGestures(onTap = { tap ->
+                    if (!isDragging) {
+                        onBoardViewModel.tapOnBoardingScreen(
+                            tapX = tap.x,
                             navigation = navigation
                         )
                     }
-                )
+                })
             }
-    ) {
-        val (textRef, imageRef, footerRef) = createRefs()
-        val middleGuideline = createGuidelineFromBottom(0.5f)
-        TextContainer(modifier = Modifier.constrainAs(textRef) {
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            bottom.linkTo(middleGuideline)
-        }, screenContent = screenContent[actualScreen - 1])
-        ImageContainer(modifier = Modifier.constrainAs(imageRef) {
+        ) {
+            val (content, image, footer, background) = createRefs()
+            val backgroundBtnRef = createGuidelineFromTop(0.82f)
+            val contentRef = createGuidelineFromTop(0.34f)
+            val imageRefTop = createGuidelineFromTop(0.42f)
+            val imageRefBtn = createGuidelineFromTop(0.68f)
 
-        })
-        FooterContainer(actualScreen, modifier = Modifier.constrainAs(footerRef) {
-            bottom.linkTo(parent.bottom)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-        }, navigation = navigation, onBoardViewModel = onBoardViewModel)
+            BackGround(modifier = Modifier.constrainAs(background) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                bottom.linkTo(backgroundBtnRef)
+                height = Dimension.fillToConstraints
+            }, color = pageContent[actualPage].color)
+            Content(content = pageContent[actualPage], modifier = Modifier.constrainAs(content) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                bottom.linkTo(contentRef)
+            })
+            ImageContainer(
+                image = pageContent[actualPage].image,
+                modifier = Modifier.constrainAs(image) {
+                    top.linkTo(imageRefTop)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(imageRefBtn)
+                    height = Dimension.fillToConstraints
+                })
+            Footer(
+                pages = pageContent.size,
+                actualPage = actualPage,
+                modifier = Modifier.constrainAs(footer) {
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                onSkip = {
+                    onBoardViewModel.navigateToStudentSelector(navigation = navigation)
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun BackgroundImage(modifier: Modifier) {
+fun BackGround(modifier: Modifier, color: Color) {
+    Surface(
+        color = color,
+        modifier = modifier.fillMaxSize(),
+        shape = RoundedCornerShape(bottomStart = 300.dp, bottomEnd = 300.dp)
+    ) {}
+}
+
+@Composable
+fun ImageContainer(modifier: Modifier, image: Int) {
+    Image(
+        painter = painterResource(id = image),
+        modifier = modifier.fillMaxSize(),
+        contentDescription = "onboarding"
+    )
+}
+
+@Composable
+fun Content(content: OnBoardInfo, modifier: Modifier) {
+    Column(
+        modifier = modifier.padding(horizontal = 45.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (!content.title.isNullOrBlank()) {
+            Text(
+                text = content.title,
+                color = Color.White,
+                fontFamily = roboto_black,
+                fontSize = 27.sp
+            )
+            Spacer(modifier = Modifier.size(10.dp))
+        }
+        Text(
+            text = content.text,
+            color = Color.White,
+            fontFamily = roboto_medium,
+            textAlign = TextAlign.Center,
+            lineHeight = 25.sp,
+            fontSize = 22.sp
+        )
+        Spacer(modifier = Modifier.size(25.dp))
+        Divider(modifier = Modifier.width(18.dp), thickness = 2.dp, color = Color.White)
+    }
+}
+
+@Composable
+fun Footer(pages: Int, actualPage: Int, modifier: Modifier, onSkip: () -> Unit) {
     Box(
         modifier = modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(0.dp, 0.dp, 250.dp, 250.dp))
-            .background(Color(0xFFCEF5A2))
-    )
-}
-
-@Composable
-fun ImageContainer(modifier: Modifier) {
-
-}
-
-@Composable
-fun TextContainer(modifier: Modifier, screenContent: OnBoardInfo) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        if (!screenContent.title.isNullOrBlank()) {
-            Text(
-                text = screenContent.title,
-                textAlign = TextAlign.Center,
-                fontFamily = roboto_black,
-                fontSize = 22.sp,
-                letterSpacing = 0.sp,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.size(12.dp))
-        }
-        Text(
-            text = screenContent.text,
-            textAlign = TextAlign.Center,
-            fontFamily = roboto_medium,
-            fontSize = 17.sp,
-            letterSpacing = 0.sp,
-            color = Color.White,
-            lineHeight = 27.sp
-        )
-        Spacer(modifier = Modifier.size(40.dp))
-        Divider(color = Color.White, thickness = 2.dp, modifier = Modifier.width(22.dp))
-        Spacer(modifier = Modifier.size(80.dp))
-    }
-}
-
-@Composable
-fun FooterContainer(
-    activeScreen: Int,
-    modifier: Modifier,
-    navigation: NavHostController,
-    onBoardViewModel: OnBoardViewModel
-) {
-    Row(modifier = modifier) {
-        Spacer(modifier = Modifier.weight(1f))
-        DotsContainer(modifier = Modifier.weight(1f), active = activeScreen)
-        Skip(
-            modifier = Modifier.weight(1f),
-            navigation = navigation,
-            onBoardViewModel = onBoardViewModel
-        )
-    }
-}
-
-@Composable
-fun Skip(modifier: Modifier, navigation: NavHostController, onBoardViewModel: OnBoardViewModel) {
-    Box(modifier = modifier) {
-        Text(
-            "OMITIR",
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .clickable { onBoardViewModel.navigateToStudentSelector(navigation) },
-            fontFamily = roboto_regular,
-            color = OnBoard_footer
-        )
-    }
-}
-
-@Composable
-fun DotsContainer(modifier: Modifier, active: Int) {
-    Box(modifier = modifier) {
+            .fillMaxWidth()
+            .padding(bottom = 30.dp, start = 30.dp, end = 30.dp)
+    ) {
         Row(
-            modifier = Modifier.align(Alignment.Center),
+            modifier = Modifier.align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Dot(active = active, number = 1)
-            Dot(active = active, number = 2)
-            Dot(active = active, number = 3)
+            for (i in 0 until pages) {
+                Dot(dotNumber = i, actualPage = actualPage)
+            }
         }
+        Text(
+            text = "OMITIR",
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .clickable { onSkip() },
+            color = Upaep_grey
+        )
     }
 }
 
 @Composable
-fun Dot(number: Int, active: Int) {
-    Card(
-        shape = RoundedCornerShape(percent = 50),
-        modifier = Modifier.size(15.dp),
-        border = BorderStroke(
-            width = 2.dp,
-            if (number == active) Color(0xFFE30921) else OnBoard_footer
-        ),
-        backgroundColor = if (number == active) Color(0xFFE30921) else Color.Transparent,
-        content = {}
-    )
+fun Dot(dotNumber: Int, actualPage: Int) {
+    Surface(
+        modifier = Modifier.size(13.dp),
+        shape = RoundedCornerShape(50.dp),
+        color = if (dotNumber == actualPage) Upaep_red else Color.Transparent,
+        border = BorderStroke(2.dp, if (dotNumber == actualPage) Upaep_red else Upaep_grey)
+    ) {
+
+    }
 }

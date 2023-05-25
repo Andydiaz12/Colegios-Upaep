@@ -23,9 +23,23 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "LOCKSMITH_JWT_KEY", "\"y6vWDdYRUm9rHzjpPI0l4TyevJUkZcmolBLgZv3FFp96fUE4DtkxODTEnYdokAeI\""
+            buildConfigField "String", "LOCKSMITH_AES_KEY", "\"c21hdWdEZXNvbGF0aW9uOkQmNCYxMzQ3\""
+            buildConfigField "String", "LOCKSMITH_AES_IV", "\"aXYTM0nLis4lrRG4\""
+            buildConfigField "String", "LOCKSMITH_CONFIG_PROJECT", "\"OFNxcHVFVmRidmE1JjMwMiYzMzU5NzkxJjEzOQ==\""
+            buildConfigField "Integer", "LOCKSMITH_AES_BLOCK_SIZE", "256"
+            buildConfigField "String", "LOCKSMITH_URL", "\"https://api.upaep.mx/services/general/keychain/\""
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "LOCKSMITH_JWT_KEY", "\"y6vWDdYRUm9rHzjpPI0l4TyevJUkZcmolBLgZv3FFp96fUE4DtkxODTEnYdokAeI\""
+            buildConfigField "String", "LOCKSMITH_CONFIG_PROJECT", "\"OFNxcHVFVmRidmE1JjMwMiYzMzU5NzkxJjEzOQ==\""
+            buildConfigField "String", "LOCKSMITH_AES_KEY", "\"c21hdWdEZXNvbGF0aW9uOkQmNCYxMzQ3\""
+            buildConfigField "String", "LOCKSMITH_AES_IV", "\"aXYTM0nLis4lrRG4\""
+            buildConfigField "String", "LOCKSMITH_URL", "\"https://api.upaep.mx/services/general/keychain/\""
+            buildConfigField "Integer", "LOCKSMITH_AES_BLOCK_SIZE", "256"
         }
     }
     compileOptions {
@@ -51,7 +65,7 @@ android {
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
     implementation 'androidx.activity:activity-compose:1.3.1'
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
@@ -95,4 +109,8 @@ dependencies {
     //Retrofit
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+
+    //JWT Creator
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.21"
 }

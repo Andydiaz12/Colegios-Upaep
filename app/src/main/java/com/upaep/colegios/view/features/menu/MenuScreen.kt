@@ -14,13 +14,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.upaep.colegios.R
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.upaep.colegios.view.base.theme.Menu_options
+import com.upaep.colegios.view.base.theme.Text_base_color
 import com.upaep.colegios.view.base.theme.Messages_red
 import com.upaep.colegios.view.base.theme.roboto_medium
+import com.upaep.colegios.viewmodel.features.menu.MenuViewModel
 
 @Composable
-fun MenuScreen(navigation: NavHostController) {
+fun MenuScreen(navigation: NavHostController, menuViewModel: MenuViewModel = hiltViewModel()) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (back, logo, content) = createRefs()
         BackIcon(modifier = Modifier.constrainAs(back) {
@@ -39,12 +41,12 @@ fun MenuScreen(navigation: NavHostController) {
                 top.linkTo(parent.top)
                 bottom.linkTo(parent.bottom)
             }
-            .fillMaxWidth())
+            .fillMaxWidth(), menuViewModel = menuViewModel, navigation = navigation)
     }
 }
 
 @Composable
-fun MenuContent(modifier: Modifier) {
+fun MenuContent(modifier: Modifier, menuViewModel: MenuViewModel, navigation: NavHostController) {
     Column(modifier = modifier.padding(start = 54.dp)) {
         MenuOptions(content = "Acerca de esta app")
         Spacer(modifier = Modifier.size(32.dp))
@@ -54,16 +56,19 @@ fun MenuContent(modifier: Modifier) {
         Spacer(modifier = Modifier.size(32.dp))
         MenuOptions(content = "Recomienda la app")
         Spacer(modifier = Modifier.size(32.dp))
-        MenuOptions(content = "Cerrar sesión")
+        MenuOptions(content = "Cerrar sesión", onClick = {
+            menuViewModel.closeSession(navigation = navigation)
+        })
     }
 }
 
 @Composable
 fun MenuOptions(content: String, onClick: () -> Unit = {}) {
     Text(
+        modifier = Modifier.clickable { onClick() },
         text = content,
         fontFamily = roboto_medium,
-        color = Menu_options,
+        color = Text_base_color,
         fontSize = 18.sp
     )
 }

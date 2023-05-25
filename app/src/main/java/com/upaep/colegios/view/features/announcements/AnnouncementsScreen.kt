@@ -27,7 +27,7 @@ fun AnnouncementsScreen(
         val (header, card) = createRefs()
         Header(modifier = Modifier.constrainAs(header) {
             top.linkTo(parent.top)
-        }, visibleImage = false, visibleMenu = false, navigation = navigation)
+        }, visibleName = false, rightMenuOptions = false, navigation = navigation)
         AnnouncementsCard(modifier = Modifier
             .constrainAs(card) {
                 top.linkTo(header.bottom)

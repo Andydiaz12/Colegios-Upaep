@@ -47,7 +47,7 @@ fun LoginExtraScreen(
         val middleGuideLine = createGuidelineFromTop(if (blockedScreen) 0.75f else 0.5f)
         Header(modifier = Modifier.constrainAs(header) {
             top.linkTo(parent.top)
-        }, visibleMenu = false, visibleImage = false, navigation = navigation)
+        }, rightMenuOptions = false, visibleName = false, navigation = navigation)
         if (blockedScreen) {
             ImageContainer(modifier = Modifier
                 .constrainAs(imageContainer) {

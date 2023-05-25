@@ -1,4 +1,4 @@
-package com.upaep.colegios.data.base.room.logindao
+package com.upaep.colegios.data.database.sessiondao
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -6,7 +6,7 @@ import androidx.room.Query
 import com.upaep.colegios.data.entities.login.UserData
 
 @Dao
-interface LoginDao {
+interface SessionDao {
     @Query("SELECT * FROM UserData")
     suspend fun getSession(): List<UserData>
 
