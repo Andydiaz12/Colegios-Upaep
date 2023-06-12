@@ -21,12 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.upaep.colegios.data.entities.grades.Grade
 import com.upaep.colegios.view.base.genericComponents.Header
 import com.upaep.colegios.view.base.theme.*
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.upaep.colegios.data.entities.grades.GeneralGrades
+import com.upaep.colegios.model.entities.grades.GeneralGrades
 import com.upaep.colegios.viewmodel.features.grades.GradesViewModel
 
 @Preview(showSystemUi = true)
@@ -56,26 +55,26 @@ fun CardContainer(modifier: Modifier, color: Color) {
             val opened = openedList[index]
             Card(shape = RoundedCornerShape(10.dp), modifier = Modifier) {
                 Column() {
-//                    CardHeader(
-//                        onClick = {
-//                            if (!opened.value) {
-//                                isAnimated = false
-//                                openedList.map { it.value = false }
-//                            } else {
-//                                isAnimated = true;
-//                            }
-//                            opened.value = !opened.value
-//                        },
-//                        opened = opened.value,
-//                        color = color,
-//                        gradeType = grade.,
-//                        average = grade.average
-//                    )
-//                    CardContent(
-//                        opened = opened.value,
-//                        animation = isAnimated,
-//                        grades = grade.grades
-//                    )
+                    CardHeader(
+                        onClick = {
+                            if (!opened.value) {
+                                isAnimated = false
+                                openedList.map { it.value = false }
+                            } else {
+                                isAnimated = true;
+                            }
+                            opened.value = !opened.value
+                        },
+                        opened = opened.value,
+                        color = color,
+                        gradeType = "",
+                        average = grade.generalAvg
+                    )
+                    CardContent(
+                        opened = opened.value,
+                        animation = isAnimated,
+                        grades = emptyList()
+                    )
                 }
             }
         }
@@ -125,7 +124,7 @@ fun CardHeader(
 }
 
 @Composable
-fun CardContent(opened: Boolean, animation: Boolean, grades: List<Grade>) {
+fun CardContent(opened: Boolean, animation: Boolean, grades: List<GeneralGrades>) {
     AnimatedVisibility(
         visible = opened,
         enter = expandVertically(expandFrom = Alignment.Top),

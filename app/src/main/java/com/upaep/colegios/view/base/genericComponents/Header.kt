@@ -8,12 +8,13 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,26 +22,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.upaep.colegios.R
-import com.upaep.colegios.view.base.navigation.Routes
+import com.upaep.colegios.model.base.UserPreferences
+import com.upaep.colegios.view.base.defaultvalues.DefaultValues
 import com.upaep.colegios.view.base.theme.Messages_red
 import com.upaep.colegios.view.base.theme.Upaep_red
 import com.upaep.colegios.view.base.theme.roboto_black
-import okhttp3.Route
 
 @Composable
 fun Header(
+    modifier: Modifier = Modifier,
     screenName: String = "",
     visibleName: Boolean = true,
     rightMenuOptions: Boolean = true,
-    modifier: Modifier = Modifier,
     changeChild: Boolean = true,
     navigation: NavHostController? = null,
     navigationPrev: Boolean = true,
-    nameBackgroundColor: Color = Color.White,
-    childName: String? = "",
     visibleNameDesc: Boolean = true,
-    backScreen: Boolean = true
+    backScreen: Boolean = true,
+    changeChildAction: () -> Unit = {},
+    onBackClick: () -> Unit = {},
+    optionalClickBack: Boolean = false
 ) {
+    val context = LocalContext.current
+    val userPreferences = UserPreferences(context)
+    val childName = userPreferences.getSelectedStudent.collectAsState(initial = DefaultValues.initialStudentSelected).value
+    val nameBackgroundColor = userPreferences.getBaseColor.collectAsState(initial = DefaultValues.initialColor).value
+
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
@@ -56,6 +63,9 @@ fun Header(
                         modifier = Modifier
                             .size(25.dp)
                             .clickable {
+                                if(optionalClickBack) {
+                                    onBackClick()
+                                }
                                 if (navigationPrev) {
                                     navigation?.popBackStack()
                                 }
@@ -77,14 +87,22 @@ fun Header(
             if (rightMenuOptions) {
                 Box(modifier = Modifier.weight(1f)) {
                     if(changeChild) {
-
-                    } else {
                         Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "menú",
-                            modifier = Modifier.align(Alignment.CenterEnd)
+                            painter = painterResource(id = R.drawable.icono_cambiar_tutorado),
+                            contentDescription = "seleccionar hijo",
+                            modifier = Modifier.size(35.dp).align(Alignment.CenterEnd).clickable {
+                                changeChildAction()
+                            },
+                            tint = Upaep_red
                         )
                     }
+//                    else {
+//                        Icon(
+//                            imageVector = Icons.Filled.Menu,
+//                            contentDescription = "menú",
+//                            modifier = Modifier.align(Alignment.CenterEnd)
+//                        )
+//                    }
                 }
             } else {
                 Spacer(modifier = Modifier.weight(1f))
@@ -97,10 +115,12 @@ fun Header(
                     .background(nameBackgroundColor)
             ) {
                 Text(
-                    text = childName ?: "",
+                    text = "${childName.name} ${childName.paternSurname} ${childName.motherSurname}",
                     textAlign = TextAlign.Center,
                     color = Color.White,
-                    modifier = Modifier.align(Alignment.Center).padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(vertical = 8.dp),
                     fontFamily = roboto_black,
                     fontSize = 11.sp
                 )
@@ -135,9 +155,10 @@ fun _Header() {
             )
             Box(modifier = Modifier.weight(1f)) {
                 Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = "menú",
-                    modifier = Modifier.align(Alignment.CenterEnd)
+                    painter = painterResource(id = R.drawable.icono_cambiar_tutorado),
+                    contentDescription = "seleccionar hijo",
+                    modifier = Modifier.size(35.dp).align(Alignment.CenterEnd),
+                    tint = Color.Magenta
                 )
             }
         }
@@ -150,7 +171,9 @@ fun _Header() {
                 text = "RICARDO IVAN SANCHEZ LOPEZ",
                 textAlign = TextAlign.Center,
                 color = Color.White,
-                modifier = Modifier.align(Alignment.Center).padding(vertical = 8.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(vertical = 8.dp),
                 fontFamily = roboto_black,
                 fontSize = 11.sp
             )

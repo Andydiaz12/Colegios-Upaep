@@ -1,6 +1,5 @@
 package com.upaep.colegios.view.features.schedule
 
-import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,10 +8,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,7 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -31,10 +34,12 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
-import com.upaep.colegios.data.entities.schedule.DayClass
-import com.upaep.colegios.data.entities.studentselector.StudentsSelector
+import com.fasterxml.jackson.databind.ser.Serializers.Base
+import com.upaep.colegios.model.base.UserPreferences
+import com.upaep.colegios.model.entities.schedule.DayClass
+import com.upaep.colegios.view.base.defaultvalues.DefaultValues
+import com.upaep.colegios.view.base.genericComponents.BottomSheetLayout
+import com.upaep.colegios.view.base.genericComponents.ChildSelectorModal
 import com.upaep.colegios.view.base.genericComponents.Header
 import com.upaep.colegios.view.base.theme.Background
 import com.upaep.colegios.view.base.theme.Dark_grey
@@ -43,32 +48,51 @@ import com.upaep.colegios.view.base.theme.Tenue_gray
 import com.upaep.colegios.view.base.theme.Text_base_color
 import com.upaep.colegios.view.base.theme.roboto_black
 import com.upaep.colegios.view.base.theme.roboto_regular
-import com.upaep.colegios.view.base.uistate.CollegesUiState
-import com.upaep.colegios.view.features.studentselector.LoadedData
+import com.upaep.colegios.viewmodel.base.genericComponents.ChildDataViewModel
 import com.upaep.colegios.viewmodel.features.schedule.ScheduleViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview(showSystemUi = true)
 @Composable
-fun ScheduleScreen(scheduleViewModel: ScheduleViewModel = hiltViewModel()) {
-    LoadedData(scheduleViewModel = scheduleViewModel)
+fun ScheduleScreen(
+    scheduleViewModel: ScheduleViewModel = hiltViewModel(),
+    childDataViewModel: ChildDataViewModel = hiltViewModel()
+) {
+    val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    ModalBottomSheetLayout(
+        sheetState = state,
+        scrimColor = Color.Black.copy(alpha = 0.6f),
+        sheetContent = {
+            ChildSelectorModal(onClick = { student, color ->
+                childDataViewModel.changeSelectedStudent(student, color)
+                scope.launch { state.hide() }
+            })
+        }
+    ) {
+        LoadedData(changeChildAction = { scope.launch { state.show() } })
+    }
 }
 
 @Composable
-fun LoadedData(scheduleViewModel: ScheduleViewModel) {
+fun LoadedData(scheduleViewModel: ScheduleViewModel = hiltViewModel(), changeChildAction: () -> Unit) {
     val dailyClasses by scheduleViewModel.scheduleList.observeAsState(emptyList())
     var dayName by rememberSaveable { mutableStateOf("LUN") }
     var selectedDay by rememberSaveable { mutableStateOf("lunes") }
     val listEquivalent by rememberSaveable { mutableStateOf(scheduleViewModel.days) }
-    val levelColor by scheduleViewModel.levelColor.observeAsState(Color.Transparent)
-    val childName by scheduleViewModel.childName.observeAsState()
+    val context = LocalContext.current
+    val userPreferences = UserPreferences(context)
+    val levelColor =
+        userPreferences.getBaseColor.collectAsState(initial = DefaultValues.initialColor).value
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, scheduleContent) = createRefs()
         Header(modifier = Modifier.constrainAs(header) {
             top.linkTo(parent.top)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        }, nameBackgroundColor = levelColor, screenName = "HORARIO", childName = childName)
+        }, screenName = "HORARIO", changeChildAction = changeChildAction)
         LazyColumn(modifier = Modifier
             .constrainAs(scheduleContent) {
                 top.linkTo(header.bottom)
@@ -154,9 +178,13 @@ fun ScheduleCard(
             )
             Spacer(modifier = Modifier.size(15.dp))
             dailyClasses.forEach() { todayClass ->
-                val value = scheduleViewModel.dayHour(dayClass = todayClass, selectedDay = selectedDay)
+                val value =
+                    scheduleViewModel.dayHour(dayClass = todayClass, selectedDay = selectedDay)
                 if (!value.isNullOrEmpty()) {
-                    val (formattedHour, actualDay) = scheduleViewModel.getHour(hourRange = value, selectedDay = selectedDay)
+                    val (formattedHour, actualDay) = scheduleViewModel.getHour(
+                        hourRange = value,
+                        selectedDay = selectedDay
+                    )
                     SingleDayClass(
                         clasName = todayClass.className.trimEnd(),
                         hourRange = formattedHour,

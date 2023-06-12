@@ -1,7 +1,6 @@
 package com.upaep.colegios.view.base.navigation
 
-import com.upaep.colegios.data.entities.announcements.Announcements
-import com.upaep.colegios.data.entities.studentselector.StudentsSelector
+import com.upaep.colegios.model.entities.announcements.Announcements
 
 sealed class Routes(val routes: String, val screenName: String = "") {
     object GradesScreen : Routes("gradesScreen")
@@ -11,7 +10,7 @@ sealed class Routes(val routes: String, val screenName: String = "") {
         fun createRoute(toScreen: String) = "loginExtraScreen/$toScreen"
     }
 
-    object OnBoardScreen : Routes("onBoardScreen")
+    object OnBoardingScreen : Routes("onBoardScreen")
     object StudentSelectorScreen : Routes("studentSelectorScreen")
     object HomeScreen : Routes("homeScreen")
     object AnnouncementScreen : Routes("announcementScreen/{title}/{content}") {
@@ -22,4 +21,7 @@ sealed class Routes(val routes: String, val screenName: String = "") {
     object MenuScreen : Routes("menuScreen")
     object CalendarScreen : Routes("calendarScreen")
     object ScheduleScreen : Routes("scheduleScreen")
+    object PaymentScreen : Routes("paymentsScreen")
+    object AdvanceTuition : Routes("advanceTuitionScreen")
+    object PaymentMethodScreen: Routes("paymentMethodScreen")
 }

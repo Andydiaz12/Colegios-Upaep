@@ -1,14 +1,11 @@
 package com.upaep.colegios.viewmodel.features.calendar
 
 import android.app.Application
-import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.upaep.colegios.data.base.preferences.UserPreferences
-import com.upaep.colegios.data.entities.calendar.CalendarConfiguration
-import com.upaep.colegios.data.entities.calendar.GoogleEvents
+import com.upaep.colegios.model.entities.calendar.CalendarConfiguration
+import com.upaep.colegios.model.entities.calendar.GoogleEvents
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
@@ -24,14 +21,15 @@ class CalendarViewModel @Inject constructor(
     private val _calendarEvents = MutableLiveData<List<GoogleEvents>>()
     private val actualMonth: Int = _calendarConfiguration.value!!.monthInInt
     private val actualDay: Int = Calendar.getInstance().get(Calendar.DATE)
+    private val actualYear: Int = Calendar.getInstance().get(Calendar.YEAR)
     private val _daysWithEvents = MutableLiveData(MutableList(35) { 0 })
-    private val userPreferences =
-        UserPreferences.getInstance(context = application.applicationContext)
+//    private val userPreferences =
+//        UserPreferences.getInstance(context = application.applicationContext)
     val calendarConfiguration: LiveData<CalendarConfiguration> = _calendarConfiguration
     val calendarEvents: LiveData<List<GoogleEvents>> = _calendarEvents
     val daysWithEvents: LiveData<MutableList<Int>> = _daysWithEvents
-    val childName: LiveData<String> = MutableLiveData(userPreferences.getChildSelected())
-    val levelColor: LiveData<Color> = MutableLiveData(Color(userPreferences.getColor()))
+//    val childName: LiveData<StudentsSelector> = MutableLiveData(userPreferences.getChildSelectedData())
+//    val levelColor: LiveData<Color> = MutableLiveData(Color(userPreferences.getColor()))
 
     init {
         fillCalendarData()
@@ -61,6 +59,7 @@ class CalendarViewModel @Inject constructor(
 
     fun getIfEventsInDay(selectedDay: Int): Boolean = _daysWithEvents.value!![selectedDay] == 0
     fun getActualDay(): Int = actualDay
+    fun getActualYear(): Int = actualYear
     fun getActualMonth(): Int = actualMonth
     fun getOtherMonth(movement: String) {
         val operator = when (movement) {

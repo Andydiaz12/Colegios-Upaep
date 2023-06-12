@@ -1,25 +1,29 @@
 package com.upaep.colegios.view.features.home
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -29,17 +33,15 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.rememberPagerState
-import com.upaep.colegios.data.entities.announcements.Announcements
+import com.upaep.colegios.model.entities.announcements.Announcements
 import com.upaep.colegios.view.base.genericComponents.*
 import com.upaep.colegios.view.base.navigation.Routes
 import com.upaep.colegios.view.base.theme.*
-import com.upaep.colegios.viewmodel.features.home.HomeViewModel
 import com.upaep.colegios.R
-import com.upaep.colegios.data.entities.studentselector.StudentsSelector
+import com.upaep.colegios.model.base.UserPreferences
+import com.upaep.colegios.model.entities.studentselector.StudentsSelector
+import com.upaep.colegios.view.base.defaultvalues.DefaultValues
+import com.upaep.colegios.viewmodel.base.genericComponents.ChildDataViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -47,24 +49,29 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     theme: ThemeSchema,
     navigation: NavHostController,
-    homeViewModel: HomeViewModel = hiltViewModel()
+    childDataViewModel: ChildDataViewModel = hiltViewModel()
 ) {
-    val levelColor by homeViewModel.levelColor.observeAsState()
-    val studentData by homeViewModel.studentData.observeAsState()
+    val context = LocalContext.current
+    val dataStore = UserPreferences(context)
+    val studentData = dataStore.getSelectedStudent.collectAsState(DefaultValues.initialStudentSelected)
+    val levelColor = dataStore.getBaseColor.collectAsState(initial = Color.Transparent)
     val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
     ModalBottomSheetLayout(
         sheetState = state,
         scrimColor = Color.Black.copy(alpha = 0.6f),
         sheetContent = {
-            ChildSelectorModal()
+            ChildSelectorModal(onClick = { student, color ->
+                childDataViewModel.changeSelectedStudent(student, color)
+                scope.launch { state.hide() }
+            })
         }
     ) {
         HomeScreenContent(
-            levelColor = levelColor,
+            levelColor = levelColor.value,
             navigation = navigation,
             theme = theme,
-            studentData = studentData,
+            studentData = studentData.value,
             changeStudentEvent = {
                 scope.launch {
                     state.show()
@@ -85,10 +92,7 @@ fun HomeScreenContent(
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (upperSection, lowerSection) = createRefs()
         ContainerHeaderAndStudent(
-            navigation = navigation,
-            studentName = "${studentData?.name} ${studentData?.paternSurname} ${studentData?.motherSurname}",
-            studentGroup = studentData?.group ?: "",
-            studentGrade = studentData?.grade.toString(),
+            studentData = studentData,
             levelColor = levelColor ?: Color.Transparent,
             modifier = Modifier
                 .constrainAs(upperSection) {
@@ -97,7 +101,7 @@ fun HomeScreenContent(
                     end.linkTo(parent.end)
                 }
                 .fillMaxWidth(),
-            changeStudentEvent = changeStudentEvent )
+            changeStudentEvent = changeStudentEvent)
         AnnouncementsAndFeatures(modifier = Modifier
             .constrainAs(lowerSection) {
                 top.linkTo(upperSection.bottom)
@@ -150,20 +154,15 @@ fun AnnouncementsAndFeatures(
 
 @Composable
 fun ContainerHeaderAndStudent(
-    navigation: NavHostController,
     levelColor: Color,
     modifier: Modifier,
-    studentName: String,
-    studentGroup: String,
-    studentGrade: String,
+    studentData: StudentsSelector?,
     changeStudentEvent: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Header(nameBackgroundColor = levelColor, visibleNameDesc = false)
+        Header(visibleNameDesc = false)
         StudentDescAndChange(
-            studentName = studentName,
-            studentGroup = studentGroup,
-            studentGrade = studentGrade,
+            studentData = studentData,
             modifier = Modifier.fillMaxWidth(),
             changeStudentEvent = changeStudentEvent,
             levelColor = levelColor
@@ -174,9 +173,7 @@ fun ContainerHeaderAndStudent(
 @Composable
 fun StudentDescAndChange(
     modifier: Modifier,
-    studentName: String,
-    studentGroup: String,
-    studentGrade: String,
+    studentData: StudentsSelector?,
     changeStudentEvent: () -> Unit,
     levelColor: Color
 ) {
@@ -189,17 +186,18 @@ fun StudentDescAndChange(
         verticalAlignment = Alignment.CenterVertically
     ) {
         StudentCardInfo(
-            studentName = studentName,
-            studentLevel = studentGrade,
+            studentName = "${studentData?.name} ${studentData?.paternSurname} ${studentData?.motherSurname}",
+            studentLevel = studentData?.school ?: "Preescolar",
             levelColor = Color.White,
-            studentGroup = studentGroup,
+            studentGroup = "${studentData?.grade}${studentData?.group}",
             selectorScreen = false,
             backgroundColor = levelColor,
             defaultTextColor = Color.White,
             imgSize = 60.dp,
             maxWidth = true,
             modifier = Modifier.weight(0.8f),
-            spacerSize = 2.dp
+            spacerSize = 2.dp,
+            textSize = 13.sp,
         )
         ChangeStudent(modifier = Modifier.weight(0.2f), changeStudentEvent = changeStudentEvent)
     }
@@ -212,10 +210,11 @@ fun ChangeStudent(modifier: Modifier, changeStudentEvent: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
+        Icon(
             painter = painterResource(id = R.drawable.icono_cambiar_tutorado),
             contentDescription = "seleccionar hijo",
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(40.dp),
+            tint = Color.White
         )
         Text(
             text = "Cambiar\nestudiante",
@@ -226,7 +225,7 @@ fun ChangeStudent(modifier: Modifier, changeStudentEvent: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AnnouncementsSection(modifier: Modifier, theme: ThemeSchema, navigation: NavHostController) {
     val announcements = getAnnouncements()
@@ -246,7 +245,7 @@ fun AnnouncementsSection(modifier: Modifier, theme: ThemeSchema, navigation: Nav
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 HorizontalPager(
-                    count = announcements.size,
+                    pageCount = announcements.size,
                     state = pagerState
                 ) { page ->
                     AnnouncementsContent(
@@ -254,11 +253,11 @@ fun AnnouncementsSection(modifier: Modifier, theme: ThemeSchema, navigation: Nav
                         content = announcements[page].content
                     )
                 }
-                HorizontalPagerIndicator(
+                /*HorizontalPagerIndicator(
                     pagerState = pagerState,
                     activeColor = Messages_red,
                     inactiveColor = Dark_grey,
-                )
+                )*/
                 Spacer(modifier = Modifier.size(30.dp))
             }
         }
@@ -334,7 +333,8 @@ fun getFeatures(): List<Feature> {
         Feature(featureName = "Boletín", image = R.drawable.icono_boletin),
         Feature(
             featureName = "Pagos y colegiaturas",
-            image = R.drawable.icono_pagos_y_colegiaturas
+            image = R.drawable.icono_pagos_y_colegiaturas,
+            destination = Routes.PaymentScreen.routes
         ),
         Feature(
             featureName = "Calificaciones",

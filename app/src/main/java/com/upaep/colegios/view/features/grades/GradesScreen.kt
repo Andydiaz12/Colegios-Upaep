@@ -22,16 +22,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.upaep.colegios.data.entities.grades.GeneralGrades
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.upaep.colegios.model.entities.grades.GeneralGrades
 import com.upaep.colegios.view.base.genericComponents.Header
 import com.upaep.colegios.view.base.theme.Text_base_color
 import com.upaep.colegios.view.base.theme.roboto_black
 import com.upaep.colegios.view.base.theme.roboto_medium
 import com.upaep.colegios.view.base.theme.roboto_regular
+import com.upaep.colegios.viewmodel.features.grades.GradesViewModel
 
 @Preview(showSystemUi = true)
 @Composable
-fun GradesScreen() {
+fun GradesScreen(gradesViewModel: GradesViewModel = hiltViewModel()) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, teacher, grades) = createRefs()
         Header(modifier = Modifier.constrainAs(header) {
@@ -50,14 +52,14 @@ fun GradesScreen() {
 
 @Composable
 fun GradesContainer(modifier: Modifier) {
-    LazyColumn(
-        modifier = modifier.padding(top = 50.dp, bottom = 100.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        items(getData()) { grade ->
-//            GradeCard(description = grade.description, average = grade.average)
-        }
-    }
+//    LazyColumn(
+//        modifier = modifier.padding(top = 50.dp, bottom = 100.dp),
+//        verticalArrangement = Arrangement.spacedBy(20.dp)
+//    ) {
+//        items(getData()) { grade ->
+//            GradeCard(description = grade.reportCard, average = grade.generalAvg)
+//        }
+//    }
 }
 
 @Composable
@@ -135,12 +137,4 @@ fun ScoreObtained(average: String) {
             textAlign = TextAlign.Center
         )
     }
-}
-
-fun getData(): List<GeneralGrades> {
-    return listOf(
-//        GeneralGrades(description = "3º Trimestre", average = "9.2"),
-//        GeneralGrades(description = "2º Trimestre", average = "8.1"),
-//        GeneralGrades(description = "1º Trimestre", average = "9"),
-    )
 }

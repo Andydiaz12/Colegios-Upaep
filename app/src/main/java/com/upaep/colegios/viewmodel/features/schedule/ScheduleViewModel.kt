@@ -2,21 +2,14 @@ package com.upaep.colegios.viewmodel.features.schedule
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.upaep.colegios.data.base.preferences.UserPreferences
-import com.upaep.colegios.data.domain.schedule.GetScheduleUseCase
-import com.upaep.colegios.data.entities.schedule.DayClass
-import com.upaep.colegios.view.base.theme.Preschool_color
+import com.upaep.colegios.model.domain.schedule.GetScheduleUseCase
+import com.upaep.colegios.model.entities.schedule.DayClass
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Calendar
 import javax.inject.Inject
@@ -29,12 +22,11 @@ class ScheduleViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _scheduleList = MutableLiveData<List<DayClass>>(emptyList())
-    private val userPreferences = UserPreferences.getInstance(application)
-    private val studentData = userPreferences.getChildSelectedData()
+//    private val userPreferences = UserPreferences.getInstance(application)
     private val calendar = Calendar.getInstance()
     val scheduleList: LiveData<List<DayClass>> = _scheduleList
-    val childName: LiveData<String> = MutableLiveData(userPreferences.getChildSelected())
-    val levelColor: LiveData<Color> = MutableLiveData(Color(userPreferences.getColor()))
+//    val studentData: LiveData<StudentsSelector> = MutableLiveData(userPreferences.getChildSelectedData())
+//    val levelColor: LiveData<Color> = MutableLiveData(Color(userPreferences.getColor()))
     val days = listOf("", "lunes", "martes", "miercoles", "jueves", "viernes")
 
     init {

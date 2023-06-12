@@ -8,9 +8,11 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -18,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +30,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.upaep.colegios.data.entities.calendar.GoogleEvents
+import com.upaep.colegios.model.base.UserPreferences
+import com.upaep.colegios.model.entities.calendar.GoogleEvents
+import com.upaep.colegios.view.base.defaultvalues.DefaultValues
+import com.upaep.colegios.view.base.genericComponents.ChildSelectorModal
 import com.upaep.colegios.view.base.genericComponents.Header
 import com.upaep.colegios.view.base.theme.Background
 import com.upaep.colegios.view.base.theme.Dark_grey
@@ -38,26 +43,70 @@ import com.upaep.colegios.view.base.theme.Upaep_red
 import com.upaep.colegios.view.base.theme.firasans_bold
 import com.upaep.colegios.view.base.theme.roboto_black
 import com.upaep.colegios.view.base.theme.roboto_regular
+import com.upaep.colegios.viewmodel.base.genericComponents.ChildDataViewModel
 import com.upaep.colegios.viewmodel.features.calendar.CalendarViewModel
+import kotlinx.coroutines.launch
 import java.text.DateFormatSymbols
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CalendarScreen(
     calendarViewModel: CalendarViewModel = hiltViewModel(),
-    navigation: NavHostController
+    navigation: NavHostController,
+    childDataViewModel: ChildDataViewModel = hiltViewModel()
 ) {
-    val levelColor by calendarViewModel.levelColor.observeAsState(Color.Transparent)
-    val childName by calendarViewModel.childName.observeAsState()
+    val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val userPreferences = UserPreferences(context)
+    val levelColor =
+        userPreferences.getBaseColor.collectAsState(initial = DefaultValues.initialColor).value
+
+    ModalBottomSheetLayout(
+        sheetState = state,
+        scrimColor = Color.Black.copy(alpha = 0.6f),
+        sheetContent = {
+            ChildSelectorModal(onClick = { student, color ->
+                childDataViewModel.changeSelectedStudent(student, color)
+                scope.launch { state.hide() }
+            })
+        }
+    ) {
+        CalendarScreenContent(
+            calendarViewModel = calendarViewModel,
+            navigation = navigation,
+            levelColor = levelColor,
+            changeChildIcon = {
+                scope.launch {
+                    state.show()
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun CalendarScreenContent(
+    calendarViewModel: CalendarViewModel,
+    navigation: NavHostController,
+    levelColor: Color,
+    changeChildIcon: () -> Unit
+) {
     val googleEvents by calendarViewModel.calendarEvents.observeAsState(emptyList())
     val daysWithEvents by calendarViewModel.daysWithEvents.observeAsState(emptyList())
-    var selectedDay by rememberSaveable { mutableStateOf(0) }
+    var selectedDay by rememberSaveable { mutableStateOf(calendarViewModel.getActualDay()) }
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, card) = createRefs()
-        Header(screenName = "CALENDARIO", modifier = Modifier.constrainAs(header) {
-            top.linkTo(parent.top)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-        }, nameBackgroundColor = levelColor, childName = childName, navigation = navigation)
+        Header(
+            screenName = "CALENDARIO",
+            modifier = Modifier.constrainAs(header) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            },
+            navigation = navigation,
+            changeChildAction = changeChildIcon
+        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -132,6 +181,7 @@ fun CalendarContainer(
     val calendarConfig by calendarViewModel.calendarConfiguration.observeAsState(calendarViewModel.getCalendarConfiguration())
     val actualMonth = calendarViewModel.getActualMonth()
     val actualDay = calendarViewModel.getActualDay()
+    val actualYear = calendarViewModel.getActualYear()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CalendarMonthContainer(
             monthName = calendarConfig.monthName,
@@ -149,7 +199,9 @@ fun CalendarContainer(
             daysWithEvents = daysWithEvents,
             clickedDay = clickedDay,
             selectedDay = selectedDay,
-            levelColor = levelColor
+            levelColor = levelColor,
+            selectedYear = calendarConfig.yearInInt,
+            actualYear = actualYear
         )
     }
 }
@@ -289,7 +341,9 @@ fun CalendarUpaep(
     daysWithEvents: List<Int>,
     clickedDay: (Int) -> Unit,
     selectedDay: Int,
-    levelColor: Color
+    levelColor: Color,
+    selectedYear: Int,
+    actualYear: Int
 ) {
     Column() {
         Row(Modifier.fillMaxWidth()) {
@@ -331,10 +385,10 @@ fun CalendarUpaep(
                                 Text(
                                     text = dayOfMonth.toString(),
                                     textAlign = TextAlign.Center,
-                                    fontFamily = if ((actualDay == dayOfMonth && actualMonth == monthSelected) || selectedDay == dayOfMonth) roboto_black else roboto_regular,
+                                    fontFamily = if ((actualDay == dayOfMonth && actualMonth == monthSelected && actualYear == selectedYear) || selectedDay == dayOfMonth) roboto_black else roboto_regular,
                                     color =
                                     if (selectedDay == dayOfMonth) Color.White
-                                    else if (actualDay == dayOfMonth && actualMonth == monthSelected) Color.Black
+                                    else if (actualDay == dayOfMonth && actualMonth == monthSelected && actualYear == selectedYear) Color.Black
                                     else if (daysWithEvents.size > dayOfMonth && daysWithEvents[dayOfMonth] == 1) levelColor
                                     else Dark_grey
                                 )

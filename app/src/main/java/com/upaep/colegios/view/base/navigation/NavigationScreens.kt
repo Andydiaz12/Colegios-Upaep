@@ -13,10 +13,12 @@ import com.upaep.colegios.view.features.grades.AllGradesScreen
 import com.upaep.colegios.view.features.login.LoginExtraScreen
 import com.upaep.colegios.view.features.login.LoginScreen
 import com.upaep.colegios.view.features.menu.MenuScreen
-import com.upaep.colegios.view.features.onboard.OnBoardScreen
+import com.upaep.colegios.view.features.onboarding.OnBoardingScreen
 import com.upaep.colegios.view.features.studentselector.StudentSelectorScreen
 import com.upaep.colegios.view.features.home.HomeScreen
-import com.upaep.colegios.view.features.schedule.ScheduleCard
+import com.upaep.colegios.view.features.payments.AdvanceTuition
+import com.upaep.colegios.view.features.payments.PaymentMethodScreen
+import com.upaep.colegios.view.features.payments.PaymentsScreen
 import com.upaep.colegios.view.features.schedule.ScheduleScreen
 import com.upaep.colegios.view.features.splash.SplashScreen
 
@@ -43,8 +45,8 @@ fun AppNavigation(theme: ThemeSchema) {
                 toScreen = backStackEntry.arguments!!.getString("toScreen").toString()
             )
         }
-        composable(Routes.OnBoardScreen.routes) {
-            OnBoardScreen(navigation = navigationController)
+        composable(Routes.OnBoardingScreen.routes) {
+            OnBoardingScreen(navigation = navigationController)
         }
         composable(Routes.StudentSelectorScreen.routes) {
             StudentSelectorScreen(navigation = navigationController)
@@ -71,6 +73,15 @@ fun AppNavigation(theme: ThemeSchema) {
         }
         composable(Routes.ScheduleScreen.routes) {
             ScheduleScreen()
+        }
+        composable(Routes.PaymentScreen.routes) {
+            PaymentsScreen(navigation = navigationController)
+        }
+        composable(Routes.AdvanceTuition.routes) {
+            AdvanceTuition()
+        }
+        composable(Routes.PaymentMethodScreen.routes) {
+            PaymentMethodScreen()
         }
     }
 }

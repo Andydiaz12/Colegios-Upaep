@@ -1,14 +1,13 @@
 package com.upaep.colegios.viewmodel.features.login
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.upaep.colegios.data.base.preferences.UserPreferences
-import com.upaep.colegios.data.domain.login.DoLoginUseCase
+import com.upaep.colegios.model.base.UserPreferences
+import com.upaep.colegios.model.domain.login.DoLoginUseCase
 import com.upaep.colegios.view.base.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -46,9 +45,8 @@ class LoginViewModel @Inject constructor(
     fun doLogin(navigation: NavHostController) {
         viewModelScope.launch {
             //val execLogin = doLoginUseCase()
-            //Si el login es exitoso hacer el siguiente bloque de código
-            UserPreferences.getInstance(context = application.applicationContext).setLogged(value = true)
-            navigation.navigate(Routes.OnBoardScreen.routes)
+            UserPreferences(context = application.applicationContext).setLogged(logged = true)
+            navigation.navigate(Routes.OnBoardingScreen.routes)
             //Si el login NO es exitoso hacer lo siguiente
         }
     }
