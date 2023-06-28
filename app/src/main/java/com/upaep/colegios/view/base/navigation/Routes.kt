@@ -3,7 +3,8 @@ package com.upaep.colegios.view.base.navigation
 import com.upaep.colegios.model.entities.announcements.Announcements
 
 sealed class Routes(val routes: String, val screenName: String = "") {
-    object GradesScreen : Routes("gradesScreen")
+    object AllGradesScreen : Routes("allGradesScreen")
+    object GradesScreen : Routes(routes = "gradesScreen")
     object SplashScreen : Routes("splashScreen")
     object LoginScreen : Routes("loginScreen")
     object LoginExtraScreen : Routes("loginExtraScreen/{toScreen}") {
@@ -23,5 +24,8 @@ sealed class Routes(val routes: String, val screenName: String = "") {
     object ScheduleScreen : Routes("scheduleScreen")
     object PaymentScreen : Routes("paymentsScreen")
     object AdvanceTuition : Routes("advanceTuitionScreen")
-    object PaymentMethodScreen: Routes("paymentMethodScreen")
+    object PaymentMethodScreen : Routes("paymentMethodScreen")
+    object AccountBalanceScreen : Routes("accountBalanceScreen")
+    object InvoiceScreen : Routes("invoiceScreen")
+    object TaxDataScreen : Routes("taxDataScreen")
 }

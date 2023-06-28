@@ -60,7 +60,7 @@ import com.upaep.colegios.viewmodel.features.payments.PaymentsViewModel
 @Composable
 fun AdvanceTuition(paymentsViewModel: PaymentsViewModel = hiltViewModel()) {
     val lastCheckedElement by paymentsViewModel.lastCheckedElement.observeAsState()
-    val paymentList by paymentsViewModel.paymentList.observeAsState(emptyList())
+    val paymentList = paymentsViewModel.paymentList
     val totalSum by paymentsViewModel.totalPaymentSum.observeAsState("$0.00")
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, static, recycler, footer) = createRefs()
@@ -68,7 +68,7 @@ fun AdvanceTuition(paymentsViewModel: PaymentsViewModel = hiltViewModel()) {
             top.linkTo(parent.top)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        })
+        }, screenName = "ANTICIPA COLEGIATURAS")
         TotalPayment(modifier = Modifier.constrainAs(static) {
             top.linkTo(header.bottom)
             start.linkTo(parent.start)
@@ -84,8 +84,9 @@ fun AdvanceTuition(paymentsViewModel: PaymentsViewModel = hiltViewModel()) {
             },
             paymentList = paymentList,
             lastCheckedElement = lastCheckedElement ?: 0,
-            checkElement = { index, partial, checked ->
-                paymentsViewModel.adjustTotalSum(amount = partial.amount, checked = checked)
+            checkElement = { partial ->
+                //paymentsViewModel.updateLastCheckedElement(partial, amount = partial.amount)
+                //paymentsViewModel.adjustTotalSum(amount = partial.amount)
 //                paymentsViewModel.updateLastCheckedElement(index = index, partial = partial)
             },
             selectAllAction = {}
@@ -145,7 +146,7 @@ fun RecyclerSection(
     modifier: Modifier,
     paymentList: List<PaymentDescription>,
     lastCheckedElement: Int,
-    checkElement: (Int, PaymentDescription, Boolean) -> Unit,
+    checkElement: (PaymentDescription) -> Unit,
     selectAllAction: () -> Unit
 ) {
     LazyColumn(
@@ -195,17 +196,15 @@ fun IndividualPartial(
     payment: PaymentDescription,
     lastCheckedElement: Int,
     index: Int,
-    checkElement: (Int, PaymentDescription, Boolean) -> Unit
+    checkElement: (PaymentDescription) -> Unit
 ) {
     val blocked = (index != lastCheckedElement)
     val textColor =
-        if (blocked) Blocked_elements else if (payment.checked) Color.Black else Upaep_grey
-    var checked by remember { mutableStateOf(false) }
+        if (blocked) Blocked_elements else if (true) Color.Black else Upaep_grey
     Card(
         shape = RoundedCornerShape(10.dp),
         modifier = if (blocked) Modifier else Modifier.clickable {
-            checked = !checked
-            checkElement(index, payment, checked)
+            checkElement(payment)
         },
         elevation = 5.dp,
         backgroundColor = Color.White
@@ -218,10 +217,9 @@ fun IndividualPartial(
         ) {
             Box(modifier = Modifier.weight(0.1f)) {
                 Checkbox(
-                    checked = checked,
+                    checked = true,
                     onCheckedChange = {
-                        checked = !checked
-                        checkElement(index, payment, checked)
+                        checkElement(payment)
                     },
                     colors = CheckboxDefaults.colors(
                         uncheckedColor = Dark_grey,
@@ -234,20 +232,20 @@ fun IndividualPartial(
                 modifier = Modifier.weight(0.6f)
             ) {
                 Text(
-                    text = payment.name,
+                    text = "payment.name",
                     color = textColor,
                     fontFamily = roboto_black,
                     fontSize = 17.sp
                 )
                 Text(
-                    text = payment.description,
+                    text = "payment.description",
                     color = textColor,
                     fontFamily = roboto_regular,
                     fontSize = 12.sp
                 )
             }
             Text(
-                text = payment.amount,
+                text = "payment.amount",
                 modifier = Modifier.weight(0.3f),
                 color = textColor,
                 fontFamily = roboto_regular,

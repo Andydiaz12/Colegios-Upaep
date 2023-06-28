@@ -13,11 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.upaep.colegios.view.base.theme.Background
 import com.upaep.colegios.view.base.theme.Upaep_red
 
 @Composable
 fun FooterWithButton(modifier: Modifier = Modifier, onClick: () -> Unit, buttonText: String) {
-    Card(modifier = modifier.fillMaxWidth(), shape = RectangleShape) {
+    Card(modifier = modifier.fillMaxWidth(), shape = RectangleShape, backgroundColor = Background) {
         Button(
             shape = RoundedCornerShape(50.dp),
             onClick = { onClick() },

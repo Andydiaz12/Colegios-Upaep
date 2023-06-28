@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import com.upaep.colegios.R
 import com.upaep.colegios.model.base.UserPreferences
 import com.upaep.colegios.view.base.defaultvalues.DefaultValues
+import com.upaep.colegios.view.base.navigation.Routes
 import com.upaep.colegios.view.base.theme.Messages_red
 import com.upaep.colegios.view.base.theme.Upaep_red
 import com.upaep.colegios.view.base.theme.roboto_black
@@ -41,12 +42,15 @@ fun Header(
     backScreen: Boolean = true,
     changeChildAction: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    optionalClickBack: Boolean = false
+    optionalClickBack: Boolean = false,
+    menuHamburger: Boolean = false
 ) {
     val context = LocalContext.current
     val userPreferences = UserPreferences(context)
-    val childName = userPreferences.getSelectedStudent.collectAsState(initial = DefaultValues.initialStudentSelected).value
-    val nameBackgroundColor = userPreferences.getBaseColor.collectAsState(initial = DefaultValues.initialColor).value
+    val childName =
+        userPreferences.getSelectedStudent.collectAsState(initial = DefaultValues.initialStudentSelected).value
+    val nameBackgroundColor =
+        userPreferences.getBaseColor.collectAsState(initial = DefaultValues.initialColor).value
 
     Column(modifier = modifier) {
         Row(
@@ -56,14 +60,14 @@ fun Header(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.weight(1f)) {
-                if(backScreen) {
+                if (backScreen) {
                     Image(
                         painter = painterResource(id = R.drawable.icono_atras),
                         contentDescription = "atrás",
                         modifier = Modifier
                             .size(25.dp)
                             .clickable {
-                                if(optionalClickBack) {
+                                if (optionalClickBack) {
                                     onBackClick()
                                 }
                                 if (navigationPrev) {
@@ -86,29 +90,33 @@ fun Header(
             }
             if (rightMenuOptions) {
                 Box(modifier = Modifier.weight(1f)) {
-                    if(changeChild) {
-                        Icon(
+                    if (changeChild) {
+                        Image(
                             painter = painterResource(id = R.drawable.icono_cambiar_tutorado),
                             contentDescription = "seleccionar hijo",
-                            modifier = Modifier.size(35.dp).align(Alignment.CenterEnd).clickable {
-                                changeChildAction()
-                            },
-                            tint = Upaep_red
+                            modifier = Modifier
+                                .size(35.dp)
+                                .align(Alignment.CenterEnd)
+                                .clickable {
+                                    changeChildAction()
+                                }
                         )
+                    } else if (menuHamburger) {
+                        Image(painter = painterResource(id = R.drawable.icono_menu),
+                            contentDescription = "menú",
+                            modifier = Modifier
+                                .size(25.dp)
+                                .align(Alignment.CenterEnd)
+                                .clickable {
+                                    navigation?.navigate(Routes.MenuScreen.routes)
+                                })
                     }
-//                    else {
-//                        Icon(
-//                            imageVector = Icons.Filled.Menu,
-//                            contentDescription = "menú",
-//                            modifier = Modifier.align(Alignment.CenterEnd)
-//                        )
-//                    }
                 }
             } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
-        if(visibleNameDesc) {
+        if (visibleNameDesc) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,7 +165,9 @@ fun _Header() {
                 Icon(
                     painter = painterResource(id = R.drawable.icono_cambiar_tutorado),
                     contentDescription = "seleccionar hijo",
-                    modifier = Modifier.size(35.dp).align(Alignment.CenterEnd),
+                    modifier = Modifier
+                        .size(35.dp)
+                        .align(Alignment.CenterEnd),
                     tint = Color.Magenta
                 )
             }

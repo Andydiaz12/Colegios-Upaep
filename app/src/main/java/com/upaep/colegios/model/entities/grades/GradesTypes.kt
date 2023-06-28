@@ -8,5 +8,5 @@ data class GradesTypes(
     @SerializedName("TIPO")
     val type: String,
     @SerializedName("PARCIALES")
-    val partials: List<PartialGrade>
+    var partials: List<PartialGrade>
 )

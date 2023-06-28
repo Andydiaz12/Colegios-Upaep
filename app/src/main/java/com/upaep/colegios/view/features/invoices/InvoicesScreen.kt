@@ -17,8 +17,15 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonElevation
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,65 +36,116 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.upaep.colegios.R
 import com.upaep.colegios.model.entities.payments.PaymentDescription
+import com.upaep.colegios.view.base.genericComponents.ChildSelectorModal
 import com.upaep.colegios.view.base.genericComponents.Header
+import com.upaep.colegios.view.base.navigation.Routes
 import com.upaep.colegios.view.base.theme.Blue_primary
 import com.upaep.colegios.view.base.theme.Text_base_color
 import com.upaep.colegios.view.base.theme.Upaep_red
 import com.upaep.colegios.view.base.theme.firasans_bold
 import com.upaep.colegios.view.base.theme.roboto_black
 import com.upaep.colegios.view.base.theme.roboto_regular
+import com.upaep.colegios.viewmodel.base.GeneralMethods
+import com.upaep.colegios.viewmodel.base.genericComponents.ChildDataViewModel
+import com.upaep.colegios.viewmodel.features.invoice.InvoiceViewModel
+import kotlinx.coroutines.launch
 
-@Preview(showSystemUi = true)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun InvoiceScreen() {
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        val invoiceData = true
-        val screenName = if(invoiceData) "HISTORIAL DE FACTURAS" else "FACTURAS"
-        val (header, content) = createRefs()
-        Header(modifier = Modifier.constrainAs(header) {
-            top.linkTo(parent.top)
-        }, screenName = screenName)
-        InvoiceScreenContent(modifier = Modifier.constrainAs(content) {
-            top.linkTo(header.bottom)
-            bottom.linkTo(parent.bottom)
-            height = Dimension.fillToConstraints
-        }, InvoiceData = invoiceData)
+fun InvoiceScreen(
+    navigation: NavHostController,
+    invoiceViewModel: InvoiceViewModel = hiltViewModel(),
+    childDataViewModel: ChildDataViewModel = hiltViewModel()
+) {
+    val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val scope = rememberCoroutineScope()
+    ModalBottomSheetLayout(
+        sheetState = state,
+        scrimColor = Color.Black.copy(alpha = 0.6f),
+        sheetContent = {
+            ButtomSheetContent(onChangeChild = {
+
+            })
+        }
+    ) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val invoiceList by invoiceViewModel.invoiceList.observeAsState(emptyList())
+            val invoiceData = true
+            val screenName = if (invoiceData) "HISTORIAL DE FACTURAS" else "FACTURAS"
+            val (header, content) = createRefs()
+            Header(modifier = Modifier.constrainAs(header) {
+                top.linkTo(parent.top)
+            }, screenName = screenName)
+            InvoiceScreenContent(modifier = Modifier.constrainAs(content) {
+                top.linkTo(header.bottom)
+                bottom.linkTo(parent.bottom)
+                height = Dimension.fillToConstraints
+            }, InvoiceData = invoiceData, navigation = navigation, invoiceList = invoiceList)
+        }
     }
 }
 
 @Composable
-fun InvoiceScreenContent(modifier: Modifier, InvoiceData: Boolean) {
+fun ButtomSheetContent(onChangeChild: () -> Unit) {
+//    ChildSelectorModal(onClick = { student, color ->
+//        childDataViewModel.changeSelectedStudent(student, color)
+//        scope.launch { state.hide() }
+//    })
+    SentMailMessage()
+}
+
+@Preview
+@Composable
+fun SentMailMessage() {
+    Column() {
+        Text(text = "")
+        Button(onClick = {}) {
+            Text(text = "ENTENDIDO")
+        }
+    }
+}
+
+
+@Composable
+fun InvoiceScreenContent(
+    modifier: Modifier,
+    InvoiceData: Boolean,
+    navigation: NavHostController,
+    invoiceList: List<PaymentDescription>
+) {
     Box(modifier = modifier) {
-        if(InvoiceData) {
-            InvoiceDataRegistered()
+        if (InvoiceData) {
+            InvoiceDataRegistered(navigation = navigation, invoiceList = invoiceList)
         } else {
             NoneInvoiceData()
         }
     }
 }
 
-@Preview(showSystemUi = true)
 @Composable
-fun InvoiceDataRegistered() {
+fun InvoiceDataRegistered(navigation: NavHostController, invoiceList: List<PaymentDescription>) {
     LazyColumn(modifier = Modifier.padding(20.dp)) {
         item {
-            InvoiceDataRegisteredHeader()
+            InvoiceDataRegisteredHeader(navigation = navigation)
             Spacer(modifier = Modifier.size(20.dp))
         }
-        items(getInvoice()) { invoice ->
+        items(invoiceList) { invoice ->
             IndividualInvoice(
-                amount = invoice.amount,
-                description = invoice.description,
-                name = invoice.name
+                amount = invoice.movaImporte,
+                description = invoice.fechamov,
+                name = invoice.ctsrDescrAl,
+                rfc = invoice.persRfc
             )
         }
     }
 }
 
 @Composable
-fun IndividualInvoice(amount: String, description: String, name: String) {
+fun IndividualInvoice(amount: String, description: String, name: String, rfc: String) {
     Card(
         elevation = 5.dp,
         shape = RoundedCornerShape(10.dp),
@@ -105,23 +163,29 @@ fun IndividualInvoice(amount: String, description: String, name: String) {
                 contentDescription = "envia factura",
                 modifier = Modifier
                     .weight(1f)
-                    .size(30.dp)
+                    .size(25.dp)
             )
             Column(
                 modifier = Modifier
                     .weight(2f)
                     .padding(start = 5.dp)
             ) {
-                Text(text = name, color = Color.Black, fontFamily = roboto_black, fontSize = 18.sp)
+                Text(text = name, color = Color.Black, fontFamily = roboto_black, fontSize = 15.sp)
                 Text(
-                    text = description,
+                    text = "Factuado el $description",
                     color = Color.Black,
                     fontFamily = roboto_regular,
-                    fontSize = 14.sp
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = rfc,
+                    color = Color.Black,
+                    fontFamily = roboto_regular,
+                    fontSize = 12.sp
                 )
             }
             Text(
-                text = amount,
+                text = GeneralMethods.currencyParse(amount),
                 color = Color.Black,
                 fontFamily = roboto_regular,
                 modifier = Modifier.weight(1f),
@@ -133,13 +197,13 @@ fun IndividualInvoice(amount: String, description: String, name: String) {
 }
 
 @Composable
-fun InvoiceDataRegisteredHeader() {
+fun InvoiceDataRegisteredHeader(navigation: NavHostController) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row {
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 modifier = Modifier.weight(1f),
-                onClick = { },
+                onClick = { navigation.navigate(Routes.TaxDataScreen.routes) },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = Blue_primary,
                     backgroundColor = Color.White
@@ -159,10 +223,10 @@ fun InvoiceDataRegisteredHeader() {
                 text = "Recibe tus facturas vía correo electrónico",
                 fontFamily = roboto_black,
                 color = Color.Black,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(0.6f),
                 fontSize = 18.sp
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(0.4f))
         }
     }
 }
@@ -233,29 +297,4 @@ fun FooterButton(modifier: Modifier) {
     ) {
         Text(text = "REGRESAR", modifier = Modifier.padding(5.dp))
     }
-}
-
-fun getInvoice(): List<PaymentDescription> {
-    return listOf(
-        PaymentDescription(
-            name = "Abono octubre",
-            description = "Facturado el 20/06/2023",
-            amount = "\$2,000.00"
-        ),
-        PaymentDescription(
-            name = "Abono septiembre",
-            description = "Facturado el 20/06/2023",
-            amount = "\$2,000.00"
-        ),
-        PaymentDescription(
-            name = "Abono agosto",
-            description = "Facturado el 20/06/2023",
-            amount = "\$2,000.00"
-        ),
-        PaymentDescription(
-            name = "Abono julio",
-            description = "Facturado el 20/06/2023",
-            amount = "\$2,000.00"
-        ),
-    )
 }

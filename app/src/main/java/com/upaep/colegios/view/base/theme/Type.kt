@@ -14,6 +14,7 @@ val roboto_medium = FontFamily(Font(R.font.roboto_medium))
 val roboto_black = FontFamily(Font(R.font.roboto_black))
 val firasans_bold = FontFamily(Font(R.font.firasans_bold))
 val roboto_condensed = FontFamily(Font(R.font.robotocondensed_regular))
+val firasans_medium = FontFamily(Font(R.font.firasans_medium))
 
 val Typography = Typography(
     body1 = TextStyle(

@@ -25,6 +25,9 @@ interface ColegiosInterface {
     @GET("students/general/colleges/schedule/")
     suspend fun getSchedule(@Query("CRYPTDATA") cryptData: String): Response<UpaepStandardResponse>
 
-    @GET
-    suspend fun getGradesTest(@Url url: String) : GeneralGrades // https://testing-data.free.beeceptor.com/todos
+    @GET("students/general/colleges/invoice/")
+    suspend fun getInvoice(@Query("CRYPTDATA") cryptData: String) : Response<UpaepStandardResponse>
+
+    @GET("students/general/colleges/accountbalance/")
+    suspend fun getAccountBalance(@Query("CRYPTDATA") cryptData: String) : Response<UpaepStandardResponse>
 }

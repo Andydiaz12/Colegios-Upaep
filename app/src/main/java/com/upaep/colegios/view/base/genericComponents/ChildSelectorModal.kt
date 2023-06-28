@@ -32,7 +32,10 @@ import com.upaep.colegios.view.base.theme.Primary_color
 import com.upaep.colegios.viewmodel.base.genericComponents.ChildSelectorModalViewModel
 
 @Composable
-fun ChildSelectorModal(childSelectorModalViewModel: ChildSelectorModalViewModel = hiltViewModel(), onClick: (StudentsSelector, Color) -> Unit) {
+fun ChildSelectorModal(
+    childSelectorModalViewModel: ChildSelectorModalViewModel = hiltViewModel(),
+    onClick: (StudentsSelector, Color) -> Unit
+) {
     val context = LocalContext.current
     val dataStore = UserPreferences(context)
     val students by childSelectorModalViewModel.students.observeAsState(emptyList())
@@ -63,9 +66,11 @@ fun ChildSelectorModal(childSelectorModalViewModel: ChildSelectorModalViewModel 
                     "preescolar" -> {
                         Preschool_color
                     }
+
                     "primaria" -> {
                         Primary_color
                     }
+
                     else -> {
                         Middleschool_color
                     }

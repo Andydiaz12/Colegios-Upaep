@@ -5,8 +5,9 @@ import androidx.room.Room
 import com.upaep.colegios.model.database.homedao.HomeDao
 import com.upaep.colegios.model.database.locksmithdao.LocksmithDao
 import com.upaep.colegios.model.database.logindao.LoginDao
-import com.upaep.colegios.model.database.sessiondao.SessionDao
 import com.upaep.colegios.model.database.ColegiosDatabase
+import com.upaep.colegios.model.database.accountbalancedao.AccountBalanceDao
+import com.upaep.colegios.model.database.invoicedao.InvoiceDao
 import com.upaep.colegios.model.database.scheduledao.ScheduleDao
 import com.upaep.colegios.model.database.studentselectordao.StudentSelectorDao
 import dagger.Module
@@ -36,11 +37,6 @@ class DatabaseModule {
     }
 
     @Provides
-    fun providesSession(colegiosDatabase: ColegiosDatabase) : SessionDao {
-        return colegiosDatabase.sessionDao()
-    }
-
-    @Provides
     fun providesStudentSelector(colegiosDatabase: ColegiosDatabase) : StudentSelectorDao {
         return colegiosDatabase.studentSelectorDao()
     }
@@ -48,6 +44,16 @@ class DatabaseModule {
     @Provides
     fun providesSchedule(colegiosDatabase: ColegiosDatabase) : ScheduleDao {
         return colegiosDatabase.scheduleDao()
+    }
+
+    @Provides
+    fun providesInvoice(colegiosDatabase: ColegiosDatabase) : InvoiceDao {
+        return colegiosDatabase.invoiceDao()
+    }
+
+    @Provides
+    fun providesAccountBalance(colegiosDatabase: ColegiosDatabase) : AccountBalanceDao {
+        return colegiosDatabase.accountBalanceDao()
     }
 
     @Provides

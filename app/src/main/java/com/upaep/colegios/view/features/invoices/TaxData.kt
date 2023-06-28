@@ -1,4 +1,4 @@
-package com.upaep.colegios.view.features.payments
+package com.upaep.colegios.view.features.invoices
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

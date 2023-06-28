@@ -28,20 +28,11 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            when (getLockSmithUseCase()) {
-                is AnswerBack.Success -> {
-                    val session = userPreferences.isLogged()
-                    val destination = if (session) {
-                        Routes.StudentSelectorScreen.routes
-                    } else {
-                        Routes.LoginScreen.routes
-                    }
-                    navigation.navigate(destination)
-                }
-
-                else -> {
-                    Log.i("errorLocksmith", ":(")
-                }
+            if(getLockSmithUseCase()) {
+                val destination = if(userPreferences.isLogged()) Routes.StudentSelectorScreen.routes else Routes.LoginScreen.routes
+                navigation.navigate(destination)
+            } else {
+                Log.i("locksmithDebug", "error al consumir el locksmith")
             }
         }
     }

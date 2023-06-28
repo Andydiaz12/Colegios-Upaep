@@ -477,27 +477,27 @@ fun OutstandingBalanceDescription(opened: Boolean) {
         enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
         exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
     ) {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(30.dp)) {
+        /*LazyColumn(verticalArrangement = Arrangement.spacedBy(30.dp)) {
             items(getDescription()) { description ->
                 IndividualOutstandingRegister(description)
             }
-        }
+        }*/
     }
 }
 
 @Composable
 fun IndividualOutstandingRegister(description: PaymentDescription) {
-    Column() {
+    /*Column() {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(text = description.name, color = Text_base_color, fontFamily = roboto_black)
             Spacer(modifier = Modifier.weight(1f))
             Text(text = description.amount, color = Text_base_color, fontFamily = roboto_regular)
         }
         Text(text = description.description, color = Text_base_color, fontFamily = roboto_regular)
-    }
+    }*/
 }
 
-fun getDescription(): List<PaymentDescription> {
+/*fun getDescription(): List<PaymentDescription> {
     return listOf(
         PaymentDescription(
             name = "Colegiatura abril",
@@ -515,4 +515,4 @@ fun getDescription(): List<PaymentDescription> {
             amount = "\$2,200.00"
         )
     )
-}
+}*/

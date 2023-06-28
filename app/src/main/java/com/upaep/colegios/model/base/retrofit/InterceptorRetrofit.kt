@@ -1,5 +1,7 @@
 package com.upaep.colegios.model.base.retrofit
 
+import com.upaep.colegios.model.base.jwt.JwtHelper
+import com.upaep.colegios.model.entities.locksmith.IDDKeychain
 import okhttp3.Interceptor
 import okhttp3.Request
 import javax.inject.Inject
@@ -11,8 +13,12 @@ class MyServiceInterceptor @Inject constructor() : Interceptor {
     private var authorization: String = ""
     private var baseUrl: String? = null
 
-    fun setAuthorization(authorization: String) {
-        this.authorization = authorization
+    fun setAuthorization(keyChain: IDDKeychain) {
+        this.authorization = JwtHelper().createJwt(
+            API_KEY = keyChain.JWTKeychain!!.apiKey!!,
+            JWT_KEY = keyChain.JWTKeychain!!.jwtKey!!,
+            JSON_KEY = keyChain.JWTKeychain?.jsonKey ?: "key"
+        )
     }
 
     fun setBaseUrl(baseUrl: String) {

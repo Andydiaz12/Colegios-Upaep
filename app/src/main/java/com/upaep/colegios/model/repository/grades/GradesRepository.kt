@@ -5,6 +5,6 @@ import javax.inject.Inject
 
 class GradesRepository @Inject constructor(private val gradesService: GradesService) {
     suspend fun getGrades() {
-        gradesService.getGrades()
+//        gradesService.getGrades()
     }
 }

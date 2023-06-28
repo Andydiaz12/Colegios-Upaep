@@ -3,6 +3,7 @@ package com.upaep.colegios.model.repository.studentselector
 import com.upaep.colegios.model.api.studentselector.StudentSelectorService
 import com.upaep.colegios.model.database.studentselectordao.StudentSelectorDao
 import com.upaep.colegios.model.entities.AnswerBack
+import com.upaep.colegios.model.entities.locksmith.IDDKeychain
 import com.upaep.colegios.model.entities.studentselector.StudentsSelector
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,8 +14,8 @@ class StudentSelectorRepository @Inject constructor(
     private val studentSelectorDao: StudentSelectorDao
 ) {
 
-    suspend fun getStudents(): List<StudentsSelector> {
-        return when (val answerBack = studentSelectorService.getStudents()) {
+    suspend fun getStudents(keyChain: IDDKeychain): List<StudentsSelector> {
+        return when (val answerBack = studentSelectorService.getStudents(keyChain = keyChain)) {
             is AnswerBack.Success -> {
                 studentSelectorDao.deleteStudents()
                 val testingData = mutableListOf(

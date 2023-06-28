@@ -3,14 +3,14 @@ package com.upaep.colegios.model.base.encryption
 import android.text.TextUtils
 import android.util.Base64
 import android.util.Log
-import com.upaep.colegios.model.entities.aes.AESKeychain
+import com.upaep.colegios.model.entities.locksmith.AESKeychain
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object AESHelper {
-    @JvmStatic fun encrypt(v:String, aesKeychain: AESKeychain) = AES256.encrypt(v, aesKeychain)
-    @JvmStatic fun decrypt(v:String, aesKeychain: AESKeychain) = AES256.decrypt(v, aesKeychain)
+    @JvmStatic fun encrypt(v:String, keychain: AESKeychain) = AES256.encrypt(v, keychain)
+    @JvmStatic fun decrypt(v:String, keychain: AESKeychain) = AES256.decrypt(v, keychain)
 }
 
 private object AES256{
@@ -33,7 +33,7 @@ private object AES256{
 
 
         val c = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        val sk = SecretKeySpec(key!!.toByteArray(Charsets.UTF_8), "AES")
+        val sk = SecretKeySpec(key.toByteArray(Charsets.UTF_8), "AES")
         val iv = IvParameterSpec(aesKeychain.iv!!.toByteArray(Charsets.UTF_8))//IvParameterSpec(secretKey.substring(0, 16).toByteArray(Charsets.UTF_8))
         c.init(opmode, sk, iv)
         return c

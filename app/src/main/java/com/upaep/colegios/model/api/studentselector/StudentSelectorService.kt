@@ -4,10 +4,9 @@ import android.util.Log
 import com.google.gson.Gson
 import com.upaep.colegios.model.base.ColegiosInterface
 import com.upaep.colegios.model.base.encryption.AESHelper
-import com.upaep.colegios.model.base.jwt.JwtHelper
 import com.upaep.colegios.model.base.retrofit.MyServiceInterceptor
 import com.upaep.colegios.model.entities.AnswerBack
-import com.upaep.colegios.model.entities.aes.AESKeychain
+import com.upaep.colegios.model.entities.locksmith.IDDKeychain
 import com.upaep.colegios.model.entities.studentselector.GetStudentModel
 import com.upaep.colegios.model.entities.studentselector.StudentsIds
 import com.upaep.colegios.model.entities.studentselector.StudentsSelector
@@ -22,28 +21,14 @@ class StudentSelectorService @Inject constructor(
     private val api: ColegiosInterface
 ) {
 
-    suspend fun getStudents() : AnswerBack<List<StudentsSelector>> {
-        myServiceInterceptor.setAuthorization(
-            authorization = JwtHelper().createJwt(
-                API_KEY = "VkKBzVKMw5JdIMBuuPwWYSjNQHOPvTOd",
-                JWT_KEY = "vHNI551IlnIi9K8gJKmrU7ENPCtjYOW9"
-            )
-        )
-
+    suspend fun getStudents(keyChain: IDDKeychain) : AnswerBack<List<StudentsSelector>> {
+        myServiceInterceptor.setAuthorization(keyChain = keyChain)
         val student = GetStudentModel(
             IDS = listOf(StudentsIds(id = "5568"), StudentsIds(id = "3392190"))
         )
         val gson = Gson()
         val cryptdata = gson.toJson(student)
-        val cryptedData = AESHelper.encrypt(
-            cryptdata,
-            aesKeychain = AESKeychain(
-                key = "MgQgB3ibSEsakXDbQtI0ImywMbplkufE",
-                iv = "nIje6EMNsLgQjSfs",
-                blockSize = 256,
-                inputKey = null
-            )
-        )
+        val cryptedData = AESHelper.encrypt(cryptdata, keychain = keyChain.AESKeychain!!)
         return withContext(Dispatchers.IO) {
             try {
                 val response =
@@ -51,18 +36,9 @@ class StudentSelectorService @Inject constructor(
                 when (response.body()?.statusCode) {
                     200 -> {
                         val responseCryptdata = response.body()!!.CRYPTDATA
-                        val decryptdata = AESHelper.decrypt(
-                            responseCryptdata,
-                            AESKeychain(
-                                iv = "nIje6EMNsLgQjSfs",
-                                key = "MgQgB3ibSEsakXDbQtI0ImywMbplkufE",
-                                blockSize = 256,
-                                inputKey = null
-                            )
-                        )
-                        Log.i("decryptData", decryptdata)
-                        val childs = gson.fromJson(decryptdata, Array<StudentsSelector>::class.java).asList()
-                        AnswerBack.Success(data = childs)
+                        val decryptdata = AESHelper.decrypt(responseCryptdata, keychain = keyChain.AESKeychain!!)
+                        val children = gson.fromJson(decryptdata, Array<StudentsSelector>::class.java).asList()
+                        AnswerBack.Success(data = children)
                     }
                     500 -> {
                         AnswerBack.InternalError(errorMessage = "")

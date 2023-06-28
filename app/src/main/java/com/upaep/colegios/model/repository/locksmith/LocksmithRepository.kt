@@ -12,19 +12,20 @@ class LocksmithRepository @Inject constructor(
     private val locksmithService: LocksmithService,
     private val locksmithDao: LocksmithDao
 ) {
-    suspend fun getLockSmith() : AnswerBack<Locksmith> {
-        val locksmith = locksmithService.getLocksmith()
-        when(locksmith) {
+
+    suspend fun getLockSmithFromService() : Boolean {
+        return when(val locksmith = locksmithService.getLocksmith()) {
             is AnswerBack.Success -> {
                 deleteLocksmith()
                 addLocksmith(locksmith = locksmith.data)
+                true
             }
-            is AnswerBack.AccessDenied -> {}
-            is AnswerBack.Error -> {}
-            is AnswerBack.NetworkError -> {}
-            is AnswerBack.InternalError -> {}
+            else -> { false }
         }
-        return locksmith
+    }
+
+    suspend fun getLockSmith() : Locksmith {
+        return locksmithDao.getLocksmith()
     }
 
     suspend fun getLocksmithFromDB(): Locksmith {

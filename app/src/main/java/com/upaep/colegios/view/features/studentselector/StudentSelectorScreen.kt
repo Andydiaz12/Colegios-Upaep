@@ -46,9 +46,15 @@ fun LoadedData(
         modifier = Modifier.fillMaxSize()
     ) {
         val (header, message, students) = createRefs()
-        Header(modifier = Modifier.constrainAs(header) {
-            top.linkTo(parent.top)
-        }, visibleName = false, rightMenuOptions = false, visibleNameDesc = false)
+        Header(
+            modifier = Modifier.constrainAs(header) {
+                top.linkTo(parent.top)
+            },
+            visibleName = false,
+            rightMenuOptions = false,
+            visibleNameDesc = false,
+            backScreen = false
+        )
         MessageContainer(modifier = Modifier.constrainAs(message) {
             top.linkTo(header.bottom)
             bottom.linkTo(students.top)
@@ -84,9 +90,11 @@ fun StudentsContainer(
                 "preescolar" -> {
                     Preschool_color
                 }
+
                 "primaria" -> {
                     Primary_color
                 }
+
                 else -> {
                     Middleschool_color
                 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.fasterxml.jackson.databind.ser.Serializers.Base
 import com.upaep.colegios.model.base.UserPreferences
 import com.upaep.colegios.model.entities.schedule.DayClass
@@ -53,7 +55,6 @@ import com.upaep.colegios.viewmodel.features.schedule.ScheduleViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
-@Preview(showSystemUi = true)
 @Composable
 fun ScheduleScreen(
     scheduleViewModel: ScheduleViewModel = hiltViewModel(),
@@ -77,7 +78,10 @@ fun ScheduleScreen(
 }
 
 @Composable
-fun LoadedData(scheduleViewModel: ScheduleViewModel = hiltViewModel(), changeChildAction: () -> Unit) {
+fun LoadedData(
+    scheduleViewModel: ScheduleViewModel = hiltViewModel(),
+    changeChildAction: () -> Unit
+) {
     val dailyClasses by scheduleViewModel.scheduleList.observeAsState(emptyList())
     var dayName by rememberSaveable { mutableStateOf("LUN") }
     var selectedDay by rememberSaveable { mutableStateOf("lunes") }
@@ -86,13 +90,14 @@ fun LoadedData(scheduleViewModel: ScheduleViewModel = hiltViewModel(), changeChi
     val userPreferences = UserPreferences(context)
     val levelColor =
         userPreferences.getBaseColor.collectAsState(initial = DefaultValues.initialColor).value
+
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (header, scheduleContent) = createRefs()
         Header(modifier = Modifier.constrainAs(header) {
             top.linkTo(parent.top)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        }, screenName = "HORARIO", changeChildAction = changeChildAction)
+        }, screenName = "HORARIO", changeChildAction = changeChildAction,)
         LazyColumn(modifier = Modifier
             .constrainAs(scheduleContent) {
                 top.linkTo(header.bottom)
@@ -215,7 +220,7 @@ fun SingleDayClass(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp),
+                .padding(horizontal = 15.dp, vertical = 5.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
@@ -230,7 +235,8 @@ fun SingleDayClass(
                 color = textColor,
                 fontFamily = roboto_black,
                 modifier = Modifier.weight(0.3f),
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                textAlign = TextAlign.Right
             )
         }
         if (!teacherName.isNullOrEmpty()) {
@@ -347,8 +353,4 @@ fun Days(
             }
         }
     }
-}
-
-fun getData(): List<DayClass> {
-    return listOf()
 }

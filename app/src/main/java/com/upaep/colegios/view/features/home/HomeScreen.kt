@@ -53,7 +53,8 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val dataStore = UserPreferences(context)
-    val studentData = dataStore.getSelectedStudent.collectAsState(DefaultValues.initialStudentSelected)
+    val studentData =
+        dataStore.getSelectedStudent.collectAsState(DefaultValues.initialStudentSelected)
     val levelColor = dataStore.getBaseColor.collectAsState(initial = Color.Transparent)
     val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
@@ -87,7 +88,7 @@ fun HomeScreenContent(
     navigation: NavHostController,
     theme: ThemeSchema,
     changeStudentEvent: () -> Unit,
-    studentData: StudentsSelector?
+    studentData: StudentsSelector?,
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (upperSection, lowerSection) = createRefs()
@@ -101,7 +102,7 @@ fun HomeScreenContent(
                     end.linkTo(parent.end)
                 }
                 .fillMaxWidth(),
-            changeStudentEvent = changeStudentEvent)
+            changeStudentEvent = changeStudentEvent, navigation = navigation)
         AnnouncementsAndFeatures(modifier = Modifier
             .constrainAs(lowerSection) {
                 top.linkTo(upperSection.bottom)
@@ -158,9 +159,16 @@ fun ContainerHeaderAndStudent(
     modifier: Modifier,
     studentData: StudentsSelector?,
     changeStudentEvent: () -> Unit,
+    navigation: NavHostController
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Header(visibleNameDesc = false)
+        Header(
+            visibleNameDesc = false,
+            backScreen = false,
+            menuHamburger = true,
+            changeChild = false,
+            navigation = navigation
+        )
         StudentDescAndChange(
             studentData = studentData,
             modifier = Modifier.fillMaxWidth(),
@@ -272,7 +280,9 @@ fun IndividualFeature(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.clickable { if (feature.destination != null) navigation.navigate(feature.destination) }
+        modifier = modifier.clickable {
+            if (feature.destination != null) navigation.navigate(feature.destination)
+        }
     ) {
         Image(
             painter = painterResource(id = feature.image),
@@ -330,27 +340,37 @@ data class Feature(
 
 fun getFeatures(): List<Feature> {
     return listOf(
-        Feature(featureName = "Boletín", image = R.drawable.icono_boletin),
-        Feature(
-            featureName = "Pagos y colegiaturas",
-            image = R.drawable.icono_pagos_y_colegiaturas,
-            destination = Routes.PaymentScreen.routes
-        ),
         Feature(
             featureName = "Calificaciones",
             image = R.drawable.icono_calificaciones,
             destination = Routes.GradesScreen.routes
         ),
         Feature(
-            featureName = "Calendario",
-            image = R.drawable.icono_calendario,
-            destination = Routes.CalendarScreen.routes
+            featureName = "Pagos y colegiaturas",
+            image = R.drawable.icono_pagos_y_colegiaturas,
+            destination = Routes.PaymentScreen.routes
+        ),
+        Feature(
+            featureName = "Estado de cuenta",
+            image = R.drawable.icono_estado_cuenta,
+            destination = Routes.AccountBalanceScreen.routes
+        ),
+        Feature(featureName = "Boletín", image = R.drawable.icono_boletin),
+        Feature(
+            featureName = "Facturas",
+            image = R.drawable.icono_facturas,
+            destination = Routes.InvoiceScreen.routes
         ),
         Feature(
             featureName = "Horario",
             image = R.drawable.icono_horario,
             destination = Routes.ScheduleScreen.routes
         ),
-        Feature(featureName = "Facturas", image = R.drawable.icono_facturas)
+        Feature(
+            featureName = "Calendario",
+            image = R.drawable.icono_calendario,
+            destination = Routes.CalendarScreen.routes
+        )
+
     )
 }
